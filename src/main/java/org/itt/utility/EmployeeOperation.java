@@ -16,7 +16,7 @@ import java.util.List;
 
 public class EmployeeOperation {
 
-    public void performEmployeeTasks() {
+    public void performEmployeeTasks(int userId) {
         try {
             BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
             EmployeeAction choice;
@@ -36,13 +36,16 @@ public class EmployeeOperation {
                 if (choice != null) {
                     switch (choice) {
                         case ORDER_FOOD:
-                            orderFood();
+                            orderFood(userId);
                             break;
                         case GIVE_FEEDBACK:
-                            giveFeedback();
+                            giveFeedback(userId);
                             break;
                         case VIEW_ORDER_HISTORY:
-                            viewOrderHistory();
+                            viewOrderHistory(userId);
+                            break;
+                        case POLL_FOR_NEXT_DAY_ITEMS:
+                            pollForNextDayItems();
                             break;
                         case EXIT:
                             System.out.println("Exiting...");
@@ -52,7 +55,7 @@ public class EmployeeOperation {
                     }
                 }
             } while (choice != EmployeeAction.EXIT);
-        } catch (IOException e) {
+        } catch (IOException | SQLException | ClassNotFoundException e) {
             e.printStackTrace();
         }
     }
@@ -61,16 +64,16 @@ public class EmployeeOperation {
         System.out.println("1. Order Food");
         System.out.println("2. Give Feedback");
         System.out.println("3. View Order History");
-        System.out.println("4. Exit");
+        System.out.println("4. Poll for next day item");
+        System.out.println("5. Exit");
         System.out.print("Enter your choice: ");
     }
 
-    private void orderFood() {
+    private void orderFood(int userId) {
         try {
             BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
             ItemRepository itemRepository = new ItemRepository();
 
-            // Display all available items
             List<Item> items = itemRepository.getAllItems();
             if (items.isEmpty()) {
                 System.out.println("No items available.");
@@ -88,10 +91,7 @@ public class EmployeeOperation {
             System.out.print("Enter the item ID to order: ");
             int itemId = Integer.parseInt(reader.readLine());
 
-            System.out.print("Enter your user ID: ");
-            int userId = Integer.parseInt(reader.readLine());
 
-            // Create and save the order
             OrderHistory orderHistory = new OrderHistory();
             orderHistory.setUserId(userId);
             orderHistory.setItemId(itemId);
@@ -106,11 +106,9 @@ public class EmployeeOperation {
         }
     }
 
-    private void giveFeedback() {
+    private void giveFeedback(int userId) {
         try {
             BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-            System.out.print("Enter your user ID: ");
-            int userId = Integer.parseInt(reader.readLine());
 
             System.out.print("Enter item ID: ");
             int itemId = Integer.parseInt(reader.readLine());
@@ -138,11 +136,9 @@ public class EmployeeOperation {
         }
     }
 
-    private void viewOrderHistory() {
+    private void viewOrderHistory(int userId) {
         try {
             BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-            System.out.print("Enter your user ID: ");
-            int userId = Integer.parseInt(reader.readLine());
 
             OrderHistoryRepository orderHistoryRepository = new OrderHistoryRepository();
             List<OrderHistory> orderHistoryList = orderHistoryRepository.getOrderHistoryByUserId(userId);
@@ -150,20 +146,38 @@ public class EmployeeOperation {
             if (orderHistoryList.isEmpty()) {
                 System.out.println("No order history found.");
             } else {
-                System.out.printf("%-10s %-10s %-10s %-20s%n", "Order ID", "User ID", "Item ID", "Order Date");
+                System.out.printf("%-10s  %-10s %-20s%n", "Order ID", "Item ID", "Order Date");
                 System.out.println("-----------------------------------------------------");
                 for (OrderHistory orderHistory : orderHistoryList) {
                     System.out.printf("%-10d %-10d %-10d %-20s%n",
                             orderHistory.getOrderId(),
-                            orderHistory.getUserId(),
                             orderHistory.getItemId(),
                             orderHistory.getOrderDate().toString());
                 }
             }
 
-        } catch (IOException | SQLException | ClassNotFoundException e) {
+        } catch (SQLException | ClassNotFoundException e) {
             e.printStackTrace();
             System.out.println("Error fetching order history. Please try again.");
         }
+    }
+
+    private void pollForNextDayItems() throws IOException, SQLException, ClassNotFoundException {
+        ItemRepository itemRepository = new ItemRepository();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+
+        List<Item> items = itemRepository.getNextDayItems();
+
+        System.out.println("Items for the Next Day:");
+        System.out.println("---------------------------------------------------------------------------------");
+        for (Item item : items) {
+            System.out.println("Item ID: " + item.getItemId() + ", Item Name: " + item.getItemName());
+        }
+        System.out.println("\nEnter the item ID you want to poll for:");
+        int itemId = Integer.parseInt(reader.readLine());
+
+        itemRepository.pollForNextDayItem(itemId);
+
+        System.out.println("Your vote has been recorded.");
     }
 }

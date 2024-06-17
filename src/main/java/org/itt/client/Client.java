@@ -8,7 +8,7 @@ import org.itt.utility.ChefOperation;
 import org.itt.utility.EmployeeOperation;
 
 import java.io.*;
-import java.net.*;
+import java.net.Socket;
 
 public class Client {
 
@@ -68,8 +68,8 @@ public class Client {
         }
     }
 
-    private static void successMessage (User user) {
-        System.out.println("Login successful!\nWelcome "+ user.getName().toUpperCase()+"\n" );
+    private static void successMessage(User user) {
+        System.out.println("Login successful!\nWelcome " + user.getName().toUpperCase() + "\n");
     }
 
     private static void redirectUser(User user) {
@@ -92,7 +92,7 @@ public class Client {
                 chefOperation.performChefTasks();
                 break;
             case EMPLOYEE:
-                employeeOperation.performEmployeeTasks();
+                employeeOperation.performEmployeeTasks(user.getUserId());
                 break;
         }
     }

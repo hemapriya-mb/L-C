@@ -9,17 +9,9 @@ public class Item implements Serializable {
     private String availabilityStatus;
     private String mealType;
     private String description;
+    private double rating;
 
     public Item() {
-    }
-
-    public Item(int itemId, String itemName, double price, String availabilityStatus, String mealType, String description) {
-        this.itemId = itemId;
-        this.itemName = itemName;
-        this.price = price;
-        this.availabilityStatus = availabilityStatus;
-        this.mealType = mealType;
-        this.description = description;
     }
 
     public int getItemId() {
@@ -68,6 +60,14 @@ public class Item implements Serializable {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public double getRating() {
+        return rating;
+    }
+
+    public void setRating(double rating) {
+        this.rating = rating;
     }
 
     @Override

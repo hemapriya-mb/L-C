@@ -32,7 +32,6 @@ public class FeedbackRepository {
 
         resultSet.close();
         statement.close();
-        connection.close();
 
         return feedbackList;
     }
@@ -49,6 +48,5 @@ public class FeedbackRepository {
 
         statement.executeUpdate();
         statement.close();
-        connection.close();
     }
 }

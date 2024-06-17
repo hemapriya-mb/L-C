@@ -4,7 +4,8 @@ public enum EmployeeAction {
     ORDER_FOOD(1),
     GIVE_FEEDBACK(2),
     VIEW_ORDER_HISTORY(3),
-    EXIT(4);
+    POLL_FOR_NEXT_DAY_ITEMS(4),
+    EXIT(5);
 
     private final int value;
 
@@ -12,16 +13,12 @@ public enum EmployeeAction {
         this.value = value;
     }
 
-    public int getValue() {
-        return value;
-    }
-
     public static EmployeeAction fromValue(int value) {
         for (EmployeeAction action : values()) {
-            if (action.getValue() == value) {
+            if (action.value == value) {
                 return action;
             }
         }
-        throw new IllegalArgumentException("Invalid action value: " + value);
+        throw new IllegalArgumentException("Invalid choice: " + value);
     }
 }
