@@ -1,52 +1,31 @@
 package org.itt.entity;
 
 public class Feedback {
-    private int feedbackId;
     private int userId;
     private int itemId;
     private int rating;
-    private String comments;
+    private String comment;
 
-    public Feedback() {
-    }
-
-    public int getFeedbackId() {
-        return feedbackId;
-    }
-
-    public void setFeedbackId(int feedbackId) {
-        this.feedbackId = feedbackId;
+    public Feedback(int userId, int itemId, int rating, String comment) {
+        this.userId = userId;
+        this.itemId = itemId;
+        this.rating = rating;
+        this.comment = comment;
     }
 
     public int getUserId() {
         return userId;
     }
 
-    public void setUserId(int userId) {
-        this.userId = userId;
-    }
-
     public int getItemId() {
         return itemId;
-    }
-
-    public void setItemId(int itemId) {
-        this.itemId = itemId;
     }
 
     public int getRating() {
         return rating;
     }
 
-    public void setRating(int rating) {
-        this.rating = rating;
-    }
-
-    public String getComments() {
-        return comments;
-    }
-
-    public void setComments(String comments) {
-        this.comments = comments;
+    public String getComment() {
+        return comment;
     }
 }

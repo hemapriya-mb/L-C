@@ -6,47 +6,43 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class FeedbackRepository {
 
-    public List<Feedback> getFeedbackByItemId(int itemId) throws SQLException, ClassNotFoundException {
-        List<Feedback> feedbackList = new ArrayList<>();
-        Connection connection = DataBaseConnector.getInstance().getConnection();
+    public void addFeedback(Feedback feedback) throws SQLException, ClassNotFoundException {
+        Connection connection = null;
+        PreparedStatement statement = null;
 
-        String query = "SELECT * FROM feedback WHERE item_id = ?";
-        PreparedStatement statement = connection.prepareStatement(query);
-        statement.setInt(1, itemId);
+            connection = DataBaseConnector.getInstance().getConnection();
 
-        ResultSet resultSet = statement.executeQuery();
-        while (resultSet.next()) {
-            Feedback feedback = new Feedback();
-            feedback.setFeedbackId(resultSet.getInt("feedback_id"));
-            feedback.setUserId(resultSet.getInt("user_id"));
-            feedback.setItemId(resultSet.getInt("item_id"));
-            feedback.setRating(resultSet.getInt("rating"));
-            feedback.setComments(resultSet.getString("comments"));
-            feedbackList.add(feedback);
-        }
+            if (!isFeedbackExists(feedback.getUserId(), feedback.getItemId(), connection)) {
+                String query = "INSERT INTO feedback (user_id, item_id, rating, comment) VALUES (?, ?, ?, ?)";
+                statement = connection.prepareStatement(query);
 
-        resultSet.close();
-        statement.close();
+                statement.setInt(1, feedback.getUserId());
+                statement.setInt(2, feedback.getItemId());
+                statement.setInt(3, feedback.getRating());
+                statement.setString(4, feedback.getComment());
 
-        return feedbackList;
+                statement.executeUpdate();
+            } else {
+                throw new SQLException("Feedback already exists for this user and item.");
+            }
+
     }
 
-    public void addFeedback(Feedback feedback) throws SQLException, ClassNotFoundException {
-        Connection connection = DataBaseConnector.getInstance().getConnection();
+    private boolean isFeedbackExists(int userId, int itemId, Connection connection) throws SQLException {
+        String query = "SELECT COUNT(*) FROM feedback WHERE user_id = ? AND item_id = ?";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, userId);
+            statement.setInt(2, itemId);
 
-        String query = "INSERT INTO feedback (user_id, item_id, rating, comments) VALUES (?, ?, ?, ?)";
-        PreparedStatement statement = connection.prepareStatement(query);
-        statement.setInt(1, feedback.getUserId());
-        statement.setInt(2, feedback.getItemId());
-        statement.setInt(3, feedback.getRating());
-        statement.setString(4, feedback.getComments());
-
-        statement.executeUpdate();
-        statement.close();
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getInt(1) > 0;
+                }
+            }
+        }
+        return false;
     }
 }

@@ -6,28 +6,43 @@ import org.itt.entity.User;
 import java.io.*;
 import java.net.Socket;
 import java.sql.SQLException;
- class ClientHandler extends Thread {
+
+class ClientHandler extends Thread {
     private Socket socket;
 
     public ClientHandler(Socket socket) {
         this.socket = socket;
     }
 
-     public void run() {
-         try (InputStream input = socket.getInputStream();
-              OutputStream output = socket.getOutputStream();
-              ObjectOutputStream oos = new ObjectOutputStream(output);
-              ObjectInputStream ois = new ObjectInputStream(input)) {
+    public void run() {
+        try (InputStream inputStream = socket.getInputStream();
+             OutputStream outputStream = socket.getOutputStream();
+             ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
+             ObjectInputStream objectInputStream = new ObjectInputStream(inputStream)) {
 
-             int userId = (int) ois.readObject();
-             String password = (String) ois.readObject();
+            String userIdString = (String) objectInputStream.readObject();
+            int userId = Integer.parseInt(userIdString);
+            String password = (String) objectInputStream.readObject();
 
-             UserRepository userRepository = new UserRepository();
-             User user = userRepository.authenticate(userId, password);
-             oos.writeObject(user);
+            UserRepository userRepository = new UserRepository();
+            User user = userRepository.getUserByUserIdAndPassword(userId, password);
 
-         } catch (IOException | ClassNotFoundException | SQLException e) {
-             e.printStackTrace();
-         }
+            if (user != null) {
+                Server.logActivity("Login", user.getUserId());
+            }
+
+            objectOutputStream.writeObject(user);
+
+            inputStream.read();
+            Server.logActivity("Logout", userId);
+        } catch (IOException | ClassNotFoundException | SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                socket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

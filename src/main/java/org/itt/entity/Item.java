@@ -10,7 +10,8 @@ public class Item implements Serializable {
     private String mealType;
     private String description;
     private double rating;
-
+    private double averageRating;
+    private int pollCount;
     public Item() {
     }
 
@@ -70,15 +71,20 @@ public class Item implements Serializable {
         this.rating = rating;
     }
 
-    @Override
-    public String toString() {
-        return "Item{" +
-                "itemId=" + itemId +
-                ", itemName='" + itemName + '\'' +
-                ", price=" + price +
-                ", availabilityStatus='" + availabilityStatus + '\'' +
-                ", mealType='" + mealType + '\'' +
-                ", description='" + description + '\'' +
-                '}';
+    public double getAverageRating() {
+        return averageRating;
     }
+
+    public void setAverageRating(double averageRating) {
+        this.averageRating = averageRating;
+    }
+
+    public int getPollCount() {
+        return pollCount;
+    }
+
+    public void setPollCount(int pollCount) {
+        this.pollCount = pollCount;
+    }
+
 }

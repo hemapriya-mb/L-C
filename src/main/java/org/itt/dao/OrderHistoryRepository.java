@@ -25,9 +25,6 @@ public class OrderHistoryRepository {
             orderHistory.setOrderDate(resultSet.getDate("order_date"));
             orderHistoryList.add(orderHistory);
         }
-
-        resultSet.close();
-        statement.close();
         return orderHistoryList;
     }
 
@@ -35,7 +32,6 @@ public class OrderHistoryRepository {
         Connection connection = null;
         PreparedStatement statement = null;
 
-        try {
             connection = DataBaseConnector.getInstance().getConnection();
             String query = "INSERT INTO order_history (user_id, item_id, order_date) VALUES (?, ?, ?)";
             statement = connection.prepareStatement(query);
@@ -44,10 +40,6 @@ public class OrderHistoryRepository {
             statement.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
 
             statement.executeUpdate();
-        } finally {
-            if (statement != null) {
-                statement.close();
-            }
-        }
+
     }
 }

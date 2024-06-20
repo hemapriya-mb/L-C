@@ -6,14 +6,16 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class UserRepository {
-    public User authenticate(int userId, String password) throws SQLException, ClassNotFoundException {
+    public User getUserByUserIdAndPassword(int userId, String password) throws SQLException, ClassNotFoundException {
         User user = null;
         Connection connection = DataBaseConnector.getInstance().getConnection();
 
-        String query = "SELECT * FROM users WHERE user_id = ? AND password = ?";
+        String query = "SELECT * FROM user WHERE user_id = ? AND password = ?";
         PreparedStatement statement = connection.prepareStatement(query);
         statement.setInt(1, userId);
         statement.setString(2, password);
@@ -22,11 +24,8 @@ public class UserRepository {
         if (resultSet.next()) {
             String name = resultSet.getString("name");
             String role = resultSet.getString("role");
-            user = new User(userId, name, role,"");
+            user = new User(userId, name, role, "");
         }
-
-        resultSet.close();
-        statement.close();
 
         return user;
     }
@@ -37,7 +36,7 @@ public class UserRepository {
 
         try {
             connection = DataBaseConnector.getInstance().getConnection();
-            String query = "INSERT INTO users (name, role, password) VALUES (?, ?, ?)";
+            String query = "INSERT INTO user (name, role, password) VALUES (?, ?, ?)";
             statement = connection.prepareStatement(query);
             statement.setString(1, user.getName());
             statement.setString(2, user.getRole());
@@ -55,4 +54,29 @@ public class UserRepository {
             throw new RuntimeException(e);
         }
     }
-}
+
+    public List<User> getAllEmployees() {
+        List<User> employees = new ArrayList<>();
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultSet = null;
+
+        try {
+            connection = DataBaseConnector.getInstance().getConnection();
+            String query = "SELECT * FROM user WHERE role = 'employee'";
+            statement = connection.prepareStatement(query);
+            resultSet = statement.executeQuery();
+
+            while (resultSet.next()) {
+                User user = new User();
+                user.setUserId(resultSet.getInt("user_id"));
+                user.setName(resultSet.getString("name"));
+
+                employees.add(user);
+            }
+            return employees;
+        } catch (SQLException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return employees;
+    }}

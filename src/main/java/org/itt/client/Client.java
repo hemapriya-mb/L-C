@@ -3,68 +3,86 @@ package org.itt.client;
 import org.itt.constant.UserRole;
 import org.itt.entity.User;
 import org.itt.exception.InvalidInputException;
-import org.itt.utility.AdminOperation;
-import org.itt.utility.ChefOperation;
-import org.itt.utility.EmployeeOperation;
+import org.itt.service.AdminService;
+import org.itt.service.ChefService;
+import org.itt.service.EmployeeService;
+import org.itt.service.UserService;
 
 import java.io.*;
 import java.net.Socket;
 
 public class Client {
 
+    private static Socket socket;
+    private static ObjectOutputStream objectOutputStream;
+
     public static void main(String[] args) {
         System.out.println("Welcome");
         boolean continueLogin = true;
+        User loggedInUser = null;
 
         while (continueLogin) {
             System.out.println("Login to continue");
 
             try {
-                UserDetail userDetail = new UserDetail();
-                User user = userDetail.getUserCredentials();
+                UserService userService = new UserService();
+                User user = userService.getUserCredentials();
                 boolean loginSuccessful = login(user);
 
                 if (loginSuccessful) {
+                    loggedInUser = user;
                     successMessage(user);
                     redirectUser(user);
                 } else {
                     System.out.println("Login failed!");
                 }
                 System.out.print("Do you want to continue? (yes/no): ");
-                BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-                String choice = reader.readLine().trim();
+                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+                String choice = bufferedReader.readLine().trim();
                 if (!choice.equalsIgnoreCase("yes")) {
                     continueLogin = false;
                 }
 
-            } catch (InvalidInputException e) {
-                System.out.println(e.getMessage());
+            } catch (InvalidInputException exception) {
+                System.out.println(exception.getMessage());
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
+        }
+
+        if (loggedInUser != null) {
+            logout();
         }
 
         System.out.println("Exiting...");
     }
 
     private static boolean login(User user) throws IOException, ClassNotFoundException {
-        try (Socket socket = new Socket("localhost", 5000);
-             OutputStream output = socket.getOutputStream();
-             InputStream input = socket.getInputStream();
-             ObjectOutputStream oos = new ObjectOutputStream(output);
-             ObjectInputStream ois = new ObjectInputStream(input)) {
+        socket = new Socket("localhost", 5000);
+        OutputStream outputStream = socket.getOutputStream();
+        InputStream inputStream = socket.getInputStream();
+        objectOutputStream = new ObjectOutputStream(outputStream);
+        ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
 
-            oos.writeObject(user.getUserId());
-            oos.writeObject(user.getPassword());
+        objectOutputStream.writeObject(String.valueOf(user.getUserId()));  // Send userId as String
+        objectOutputStream.writeObject(user.getPassword());
 
-            User authenticatedUser = (User) ois.readObject();
-            if (authenticatedUser != null) {
-                user.setName(authenticatedUser.getName());
-                user.setRole(authenticatedUser.getRole());
-                return true;
-            } else {
-                return false;
-            }
+        User authenticatedUser = (User) objectInputStream.readObject();
+        if (authenticatedUser != null) {
+            user.setName(authenticatedUser.getName());
+            user.setRole(authenticatedUser.getRole());
+            return true;
+        } else {
+            socket.close();
+            return false;
+        }
+    }
+
+    private static void logout() {
+        try {
+            socket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -73,9 +91,9 @@ public class Client {
     }
 
     private static void redirectUser(User user) {
-        AdminOperation adminOperation = new AdminOperation();
-        ChefOperation chefOperation = new ChefOperation();
-        EmployeeOperation employeeOperation = new EmployeeOperation();
+        AdminService adminService = new AdminService();
+        ChefService chefService = new ChefService();
+        EmployeeService employeeService = new EmployeeService();
         UserRole role;
         try {
             role = UserRole.fromValue(user.getRole().toLowerCase());
@@ -86,13 +104,13 @@ public class Client {
 
         switch (role) {
             case ADMIN:
-                adminOperation.performAdminTasks();
+                adminService.performAdminTasks();
                 break;
             case CHEF:
-                chefOperation.performChefTasks();
+                chefService.performChefTasks();
                 break;
             case EMPLOYEE:
-                employeeOperation.performEmployeeTasks(user.getUserId());
+                employeeService.performEmployeeTasks(user.getUserId());
                 break;
         }
     }

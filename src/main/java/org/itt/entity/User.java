@@ -11,6 +11,7 @@ public class User implements Serializable {
 
     public User() {
     }
+
     public User(int userId, String name, String role, String password) {
         this.userId = userId;
         this.name = name;
@@ -50,13 +51,5 @@ public class User implements Serializable {
         this.role = role;
     }
 
-    @Override
-    public String toString() {
-        return "User{" +
-                "userId=" + userId +
-                ", name='" + name + '\'' +
-                ", password='" + password + '\'' +
-                ", role='" + role + '\'' +
-                '}';
-    }
+
 }
