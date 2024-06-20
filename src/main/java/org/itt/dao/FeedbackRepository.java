@@ -10,32 +10,26 @@ import java.sql.SQLException;
 public class FeedbackRepository {
 
     public void addFeedback(Feedback feedback) throws SQLException, ClassNotFoundException {
-        Connection connection = null;
-        PreparedStatement statement = null;
+        String query = "INSERT INTO feedback (user_id, order_id, item_id, rating, comment) VALUES (?, ?, ?, ?, ?)";
 
-            connection = DataBaseConnector.getInstance().getConnection();
+        try (Connection connection =DataBaseConnector.getInstance().getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, feedback.getUserId());
+            statement.setInt(2, feedback.getOrderId());
+            statement.setInt(3, feedback.getItemId());
+            statement.setInt(4, feedback.getRating());
+            statement.setString(5, feedback.getComment());
 
-            if (!isFeedbackExists(feedback.getUserId(), feedback.getItemId(), connection)) {
-                String query = "INSERT INTO feedback (user_id, item_id, rating, comment) VALUES (?, ?, ?, ?)";
-                statement = connection.prepareStatement(query);
-
-                statement.setInt(1, feedback.getUserId());
-                statement.setInt(2, feedback.getItemId());
-                statement.setInt(3, feedback.getRating());
-                statement.setString(4, feedback.getComment());
-
-                statement.executeUpdate();
-            } else {
-                throw new SQLException("Feedback already exists for this user and item.");
-            }
-
+            statement.executeUpdate();
+        }
     }
 
-    private boolean isFeedbackExists(int userId, int itemId, Connection connection) throws SQLException {
-        String query = "SELECT COUNT(*) FROM feedback WHERE user_id = ? AND item_id = ?";
+    private boolean isFeedbackExists(int userId, int orderId, int itemId, Connection connection) throws SQLException {
+        String query = "SELECT COUNT(*) FROM feedback WHERE user_id = ? AND order_id = ? AND item_id = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setInt(1, userId);
-            statement.setInt(2, itemId);
+            statement.setInt(2, orderId);
+            statement.setInt(3, itemId);
 
             try (ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {

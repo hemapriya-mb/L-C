@@ -1,7 +1,7 @@
 package org.itt.constant;
 
 public enum ChefAction {
-    VIEW_TOP_ITEMS(1),
+    VIEW_HIGH_RATED_ITEMS(1),
     SELECT_ITEMS_FOR_NEXT_DAY(2),
     EXIT(3);
 

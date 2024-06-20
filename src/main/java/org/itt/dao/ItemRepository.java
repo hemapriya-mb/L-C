@@ -89,92 +89,55 @@ public class ItemRepository {
     }
 
 
-    public List<Item> getAllItemsWithRatings() throws SQLException, ClassNotFoundException {
-        Connection connection = DataBaseConnector.getInstance().getConnection();
-        String query = "SELECT i.item_id, i.item_name, i.price, i.availability_status, i.meal_type, i.description, " +
-                "COALESCE(AVG(f.rating), 0) as rating " +
-                "FROM Item i LEFT JOIN Feedback f ON i.item_id = f.item_id " +
-                "GROUP BY i.item_id";
-        PreparedStatement statement = connection.prepareStatement(query);
-        ResultSet resultSet = statement.executeQuery();
-
-        List<Item> items = new ArrayList<>();
-        while (resultSet.next()) {
-            Item item = new Item();
-            item.setItemId(resultSet.getInt("item_id"));
-            item.setItemName(resultSet.getString("item_name"));
-            item.setPrice(resultSet.getDouble("price"));
-            item.setAvailabilityStatus(resultSet.getString("availability_status"));
-            item.setMealType(resultSet.getString("meal_type"));
-            item.setDescription(resultSet.getString("description"));
-            item.setRating(resultSet.getDouble("rating"));
-
-            items.add(item);
-        }
-
-        return items;
-    }
-
-    public void addItemToNextDayList(int itemId) throws SQLException, ClassNotFoundException {
-        Connection connection = DataBaseConnector.getInstance().getConnection();
-        String query = "INSERT INTO next_day_item (item_id, item_name) SELECT item_id, item_name FROM Item WHERE item_id = ?";
-        PreparedStatement statement = connection.prepareStatement(query);
-        statement.setInt(1, itemId);
-        statement.executeUpdate();
-
-    }
-
-    public List<Item> getNextDayItems() throws SQLException, ClassNotFoundException {
-        Connection connection = DataBaseConnector.getInstance().getConnection();
-        String query = "SELECT item_id, item_name FROM next_day_item";
-        PreparedStatement statement = connection.prepareStatement(query);
-        ResultSet resultSet = statement.executeQuery();
-
-        List<Item> items = new ArrayList<>();
-        while (resultSet.next()) {
-            Item item = new Item();
-            item.setItemId(resultSet.getInt("item_id"));
-            item.setItemName(resultSet.getString("item_name"));
-            items.add(item);
-        }
-
-        return items;
-    }
-
-    public void pollForNextDayItem(int itemId) throws SQLException, ClassNotFoundException {
-        Connection connection = DataBaseConnector.getInstance().getConnection();
-        String query = "UPDATE next_day_item SET poll_count = poll_count + 1 WHERE item_id = ?";
-        PreparedStatement statement = connection.prepareStatement(query);
-        statement.setInt(1, itemId);
-        statement.executeUpdate();
-
-    }
-
     public List<Item> getTopRatedItems() throws SQLException, ClassNotFoundException {
-        String query = "SELECT i.item_id, i.item_name, i.meal_type, AVG(f.rating) AS average_rating " +
-                "FROM Item i " +
-                "JOIN Feedback f ON i.item_id = f.item_id " +
-                "GROUP BY i.item_id, i.item_name, i.meal_type " +
-                "ORDER BY average_rating DESC " +
+        String TOP_ITEMS_QUERY = "SELECT item.item_id, item.item_name, item.price, item.availability_status, " +
+                "item.meal_type, item.description, AVG(feedback.rating) as avg_rating " +
+                "FROM item " +
+                "JOIN feedback ON item.item_id = feedback.item_id " +
+                "GROUP BY item.item_id, item.item_name, item.price, item.availability_status, " +
+                "item.meal_type, item.description " +
+                "ORDER BY avg_rating DESC " +
                 "LIMIT 10";
 
-        List<Item> topRatedItems = new ArrayList<>();
+        List<Item> topItems = new ArrayList<>();
+        Connection connection = DataBaseConnector.getInstance().getConnection();
 
-        try (Connection connection = DataBaseConnector.getInstance().getConnection();
-             PreparedStatement statement = connection.prepareStatement(query);
-             ResultSet resultSet = statement.executeQuery()) {
+        try (PreparedStatement stmt = connection.prepareStatement(TOP_ITEMS_QUERY);
+             ResultSet rs = stmt.executeQuery()) {
 
-            while (resultSet.next()) {
-                Item item = new Item();
-                item.setItemId(resultSet.getInt("item_id"));
-                item.setItemName(resultSet.getString("item_name"));
-                item.setMealType(resultSet.getString("meal_type"));
-                item.setRating(resultSet.getDouble("average_rating"));
-                topRatedItems.add(item);
+            while (rs.next()) {
+                int itemId = rs.getInt("item_id");
+                String itemName = rs.getString("item_name");
+                double price = rs.getDouble("price");
+                String availabilityStatus = rs.getString("availability_status");
+                String mealType = rs.getString("meal_type");
+                String description = rs.getString("description");
+                double avgRating = rs.getDouble("avg_rating");
+                topItems.add(new Item(itemId, itemName, price, availabilityStatus, mealType, description, avgRating));
             }
         }
 
-        return topRatedItems;
+        return topItems;
     }
 
+    public Item getItemById(int itemId) throws SQLException, ClassNotFoundException {
+        Item item = null;
+        String query = "SELECT * FROM item WHERE item_id = ?";
+        try (Connection connection = DataBaseConnector.getInstance().getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setInt(1, itemId);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    item = new Item();
+                    item.setItemId(resultSet.getInt("item_id"));
+                    item.setItemName(resultSet.getString("item_name"));
+                    item.setPrice(resultSet.getDouble("price"));
+                    item.setAvailabilityStatus(resultSet.getString("availability_status"));
+                    item.setMealType(resultSet.getString("meal_type"));
+                    item.setDescription(resultSet.getString("description"));
+                }
+            }
+        }
+        return item;
+    }
 }

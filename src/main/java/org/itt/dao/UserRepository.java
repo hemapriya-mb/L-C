@@ -75,8 +75,10 @@ public class UserRepository {
                 employees.add(user);
             }
             return employees;
-        } catch (SQLException | ClassNotFoundException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
         }
         return employees;
     }}

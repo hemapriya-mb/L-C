@@ -2,6 +2,7 @@ package org.itt.service;
 
 import org.itt.constant.EmployeeAction;
 import org.itt.constant.FeedbackComment;
+import org.itt.constant.SpecificFeedback;
 import org.itt.dao.*;
 import org.itt.entity.Feedback;
 import org.itt.entity.Item;
@@ -16,12 +17,13 @@ import java.time.LocalDate;
 import java.util.List;
 
 public class EmployeeService {
-    private final ItemRepository itemRepository = new ItemRepository();
-    private final PollRepository pollRepository = new PollRepository();
-    private final NextDayItemsRepository nextDayItemsRepository = new NextDayItemsRepository();
-//    private final NotificationRepository notificationRepository = new NotificationRepository();
+    private final ItemRepository itemRepository;
+    private NotificationRepository notificationRepository;
 
-
+    public EmployeeService() {
+        notificationRepository = new NotificationRepository();
+        itemRepository = new ItemRepository();
+    }
     public void performEmployeeTasks(int userId) {
         try {
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
@@ -54,6 +56,9 @@ public class EmployeeService {
                         case POLL_FOR_NEXT_DAY_ITEMS:
                             pollForNextDayItems(userId);
                             break;
+                            case VIEW_NOTIFICATIONS:
+                            viewNotifications();
+                            break;
                         case EXIT:
                             System.out.println("Exiting...");
                             break;
@@ -67,23 +72,13 @@ public class EmployeeService {
         }
     }
 
-    //    private void viewNotifications() {
-//        try {
-//            List<Notification> notifications = notificationRepository.getNotificationsForEmployee();
-//            System.out.println("Notifications:");
-//            for (Notification notification : notifications) {
-//                System.out.println(notification.getMessage() + " (Received: " + notification.getTimestamp() + ")\n");
-//            }
-//        } catch (SQLException | ClassNotFoundException e) {
-//            System.out.println("Error retrieving notifications: " + e.getMessage());
-//        }
-//    }
     private void displayMenu() {
         System.out.println("1. Order Food");
         System.out.println("2. Give Feedback");
         System.out.println("3. View Order History");
         System.out.println("4. Poll for next day item");
-        System.out.println("5. Exit");
+        System.out.println("5. View Notifications");
+        System.out.println("6. Exit");
         System.out.print("Enter your choice: ");
     }
 
@@ -124,9 +119,11 @@ public class EmployeeService {
     }
 
     private void giveFeedback(int userId) {
-        try {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
             FeedbackRepository feedbackRepository = new FeedbackRepository();
+
+            System.out.print("Enter the order ID: ");
+            int orderId = Integer.parseInt(reader.readLine());
 
             System.out.print("Enter the item ID: ");
             int itemId = Integer.parseInt(reader.readLine());
@@ -142,7 +139,17 @@ public class EmployeeService {
             int commentChoice = Integer.parseInt(reader.readLine());
             FeedbackComment feedbackComment = FeedbackComment.fromValue(commentChoice);
 
-            Feedback feedback = new Feedback(userId, itemId, rating, feedbackComment.getComment());
+            System.out.println("Select a comment:");
+            for (SpecificFeedback specificFeedback : SpecificFeedback.values()) {
+                System.out.println(specificFeedback.ordinal() + 1 + ". " + specificFeedback.getComment());
+            }
+
+            int specificChoice = Integer.parseInt(reader.readLine());
+            SpecificFeedback specificFeedback = SpecificFeedback.fromValue(specificChoice);
+
+            String userFeedback = feedbackComment.getComment() + "," + specificFeedback.getComment();
+
+            Feedback feedback = new Feedback(userId, orderId, itemId, rating, userFeedback);
             feedbackRepository.addFeedback(feedback);
 
             System.out.println("Feedback submitted successfully.");
@@ -179,31 +186,53 @@ public class EmployeeService {
     }
 
     public void pollForNextDayItems(int userId) {
-        try {
-            List<Item> nextDayItems = nextDayItemsRepository.getNextDayItems();
-            System.out.println("Items available for next day:");
-            System.out.println("ID    Name              Poll Count");
-            System.out.println("----------------------------------");
-            for (Item item : nextDayItems) {
-                System.out.printf("%-5d %-17s %-15d%n", item.getItemId(), item.getItemName(), item.getPollCount());
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
+            NextDayItemRepository nextDayItemRepository = new NextDayItemRepository();
+            ItemRepository itemRepository = new ItemRepository();
+
+            List<Integer> nextDayItemIds = nextDayItemRepository.getNextDayItemIds();
+            if (nextDayItemIds.isEmpty()) {
+                System.out.println("No items available for next day.");
+                return;
             }
 
-            BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+            System.out.println("Items available for next day polling:");
+            System.out.printf("%-10s %-20s %-10s %-15s %-15s %-20s%n", "Item ID", "Item Name", "Price", "Availability", "Meal Type", "Description");
+            System.out.println("-------------------------------------------------------------------------------------------------------");
+
+            for (int itemId : nextDayItemIds) {
+                Item item = itemRepository.getItemById(itemId);
+                System.out.printf("%-10d %-20s %-10.2f %-15s %-15s %-20s%n",
+                        item.getItemId(), item.getItemName(), item.getPrice(), item.getAvailabilityStatus(), item.getMealType(), item.getDescription());
+            }
+
             System.out.print("Enter the item ID to poll for: ");
-            int itemId = Integer.parseInt(reader.readLine().trim());
+            int itemId = Integer.parseInt(reader.readLine());
 
-            Date pollDate = Date.valueOf(LocalDate.now());
-
-            if (pollRepository.hasPolled(userId, itemId, pollDate)) {
-                System.out.println("You have already polled for this item today.");
-            } else {
-                pollRepository.addPoll(userId, itemId, pollDate);
-                nextDayItemsRepository.incrementPollCount(itemId);
-                System.out.println("Your poll has been recorded.");
+            boolean validItemId = nextDayItemIds.contains(itemId);
+            if (!validItemId) {
+                System.out.println("Invalid item ID. Please try again.");
+                return;
             }
 
-        } catch (SQLException | ClassNotFoundException | IOException e) {
+            nextDayItemRepository.incrementPollCount(itemId);
+            System.out.println("Poll count updated successfully for item ID: " + itemId);
+
+        } catch (IOException | NumberFormatException e) {
+            System.out.println("Invalid input. Please try again.");
+        } catch (SQLException | ClassNotFoundException e) {
             System.out.println("Error: " + e.getMessage());
+        }
+    }
+    private void viewNotifications() {
+        try {
+            List<String> notifications = notificationRepository.getNotifications();
+            System.out.println("Notifications:");
+            for (String notification : notifications) {
+                System.out.println(notification);
+            }
+        } catch (SQLException | ClassNotFoundException e) {
+            e.printStackTrace();
         }
     }
 }

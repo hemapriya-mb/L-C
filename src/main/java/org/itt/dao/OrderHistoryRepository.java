@@ -32,14 +32,14 @@ public class OrderHistoryRepository {
         Connection connection = null;
         PreparedStatement statement = null;
 
-            connection = DataBaseConnector.getInstance().getConnection();
-            String query = "INSERT INTO order_history (user_id, item_id, order_date) VALUES (?, ?, ?)";
-            statement = connection.prepareStatement(query);
-            statement.setInt(1, orderHistory.getUserId());
-            statement.setInt(2, orderHistory.getItemId());
-            statement.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+        connection = DataBaseConnector.getInstance().getConnection();
+        String query = "INSERT INTO order_history (user_id, item_id, order_date) VALUES (?, ?, ?)";
+        statement = connection.prepareStatement(query);
+        statement.setInt(1, orderHistory.getUserId());
+        statement.setInt(2, orderHistory.getItemId());
+        statement.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
 
-            statement.executeUpdate();
+        statement.executeUpdate();
 
     }
 }

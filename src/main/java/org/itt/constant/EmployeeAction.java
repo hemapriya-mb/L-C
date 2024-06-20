@@ -5,7 +5,8 @@ public enum EmployeeAction {
     GIVE_FEEDBACK(2),
     VIEW_ORDER_HISTORY(3),
     POLL_FOR_NEXT_DAY_ITEMS(4),
-    EXIT(5);
+    VIEW_NOTIFICATIONS(5),
+    EXIT(6);
 
     private final int value;
 

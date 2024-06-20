@@ -64,7 +64,7 @@ public class Client {
         objectOutputStream = new ObjectOutputStream(outputStream);
         ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
 
-        objectOutputStream.writeObject(String.valueOf(user.getUserId()));  // Send userId as String
+        objectOutputStream.writeObject(String.valueOf(user.getUserId()));
         objectOutputStream.writeObject(user.getPassword());
 
         User authenticatedUser = (User) objectInputStream.readObject();

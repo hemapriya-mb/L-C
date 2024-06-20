@@ -2,12 +2,14 @@ package org.itt.entity;
 
 public class Feedback {
     private int userId;
+    private int orderId;
     private int itemId;
     private int rating;
     private String comment;
 
-    public Feedback(int userId, int itemId, int rating, String comment) {
+    public Feedback(int userId, int orderId, int itemId, int rating, String comment) {
         this.userId = userId;
+        this.orderId = orderId;
         this.itemId = itemId;
         this.rating = rating;
         this.comment = comment;
@@ -27,5 +29,12 @@ public class Feedback {
 
     public String getComment() {
         return comment;
+    }
+    public int getOrderId() {
+        return orderId;
+    }
+
+    public void setOrderId(int orderId) {
+        this.orderId = orderId;
     }
 }
