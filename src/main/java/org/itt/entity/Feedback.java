@@ -7,6 +7,9 @@ public class Feedback {
     private int rating;
     private String comment;
 
+    public Feedback() {
+    }
+
     public Feedback(int userId, int orderId, int itemId, int rating, String comment) {
         this.userId = userId;
         this.orderId = orderId;
@@ -19,22 +22,39 @@ public class Feedback {
         return userId;
     }
 
-    public int getItemId() {
-        return itemId;
+    public void setUserId(int userId) {
+        this.userId = userId;
     }
 
-    public int getRating() {
-        return rating;
-    }
-
-    public String getComment() {
-        return comment;
-    }
     public int getOrderId() {
         return orderId;
     }
 
     public void setOrderId(int orderId) {
         this.orderId = orderId;
+    }
+
+    public int getItemId() {
+        return itemId;
+    }
+
+    public void setItemId(int itemId) {
+        this.itemId = itemId;
+    }
+
+    public int getRating() {
+        return rating;
+    }
+
+    public void setRating(int rating) {
+        this.rating = rating;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
     }
 }

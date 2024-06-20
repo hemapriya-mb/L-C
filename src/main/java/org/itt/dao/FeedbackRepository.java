@@ -6,6 +6,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class FeedbackRepository {
 
@@ -38,5 +40,45 @@ public class FeedbackRepository {
             }
         }
         return false;
+    }
+    public List<Feedback> getFeedbackByItemId(int itemId) throws SQLException, ClassNotFoundException {
+        List<Feedback> feedbackList = new ArrayList<>();
+        String query = "SELECT * FROM feedback WHERE item_id = ?";
+        try (Connection connection = DataBaseConnector.getInstance().getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setInt(1, itemId);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    Feedback feedback = new Feedback();
+                    feedback.setUserId(resultSet.getInt("user_id"));
+                    feedback.setOrderId(resultSet.getInt("order_id"));
+                    feedback.setItemId(resultSet.getInt("item_id"));
+                    feedback.setRating(resultSet.getInt("rating"));
+                    feedback.setComment(resultSet.getString("comment"));
+                    feedbackList.add(feedback);
+                }
+            }
+        }
+        return feedbackList;
+    }
+
+    public List<Feedback> getAllFeedback() throws SQLException, ClassNotFoundException {
+        List<Feedback> feedbackList = new ArrayList<>();
+        String query = "SELECT * FROM feedback";
+        try (
+             Connection connection = DataBaseConnector.getInstance().getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query);
+             ResultSet resultSet = preparedStatement.executeQuery()) {
+            while (resultSet.next()) {
+                Feedback feedback = new Feedback();
+                feedback.setUserId(resultSet.getInt("user_id"));
+                feedback.setOrderId(resultSet.getInt("order_id"));
+                feedback.setItemId(resultSet.getInt("item_id"));
+                feedback.setRating(resultSet.getInt("rating"));
+                feedback.setComment(resultSet.getString("comment"));
+                feedbackList.add(feedback);
+            }
+        }
+        return feedbackList;
     }
 }

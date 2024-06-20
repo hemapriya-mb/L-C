@@ -6,7 +6,8 @@ public enum EmployeeAction {
     VIEW_ORDER_HISTORY(3),
     POLL_FOR_NEXT_DAY_ITEMS(4),
     VIEW_NOTIFICATIONS(5),
-    EXIT(6);
+    VIEW_RECOMMENDATIONS(6),
+    EXIT(7);
 
     private final int value;
 
@@ -20,6 +21,6 @@ public enum EmployeeAction {
                 return action;
             }
         }
-        throw new IllegalArgumentException("Invalid choice: " + value);
+        throw new IllegalArgumentException("Invalid value: " + value);
     }
 }

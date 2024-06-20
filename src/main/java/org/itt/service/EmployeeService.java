@@ -19,11 +19,14 @@ import java.util.List;
 public class EmployeeService {
     private final ItemRepository itemRepository;
     private NotificationRepository notificationRepository;
+    private RecommendationService recommendationService;
 
     public EmployeeService() {
         notificationRepository = new NotificationRepository();
         itemRepository = new ItemRepository();
+        recommendationService = new RecommendationService();
     }
+
     public void performEmployeeTasks(int userId) {
         try {
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
@@ -56,8 +59,11 @@ public class EmployeeService {
                         case POLL_FOR_NEXT_DAY_ITEMS:
                             pollForNextDayItems(userId);
                             break;
-                            case VIEW_NOTIFICATIONS:
+                        case VIEW_NOTIFICATIONS:
                             viewNotifications();
+                            break;
+                        case VIEW_RECOMMENDATIONS:
+                            viewRecommendations();
                             break;
                         case EXIT:
                             System.out.println("Exiting...");
@@ -78,7 +84,8 @@ public class EmployeeService {
         System.out.println("3. View Order History");
         System.out.println("4. Poll for next day item");
         System.out.println("5. View Notifications");
-        System.out.println("6. Exit");
+        System.out.println("6. View Recommendations");
+        System.out.println("7. Exit");
         System.out.print("Enter your choice: ");
     }
 
@@ -224,6 +231,7 @@ public class EmployeeService {
             System.out.println("Error: " + e.getMessage());
         }
     }
+
     private void viewNotifications() {
         try {
             List<String> notifications = notificationRepository.getNotifications();
@@ -234,5 +242,9 @@ public class EmployeeService {
         } catch (SQLException | ClassNotFoundException e) {
             e.printStackTrace();
         }
+    }
+
+    private void viewRecommendations() {
+        recommendationService.generateRecommendations();
     }
 }
