@@ -1,5 +1,6 @@
 package org.itt.service;
 
+import org.itt.constant.ChefAction;
 import org.itt.constant.EmployeeAction;
 import org.itt.constant.FeedbackComment;
 import org.itt.constant.SpecificFeedback;
@@ -7,6 +8,7 @@ import org.itt.dao.*;
 import org.itt.entity.Feedback;
 import org.itt.entity.Item;
 import org.itt.entity.OrderHistory;
+import org.itt.exception.DatabaseException;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -18,8 +20,8 @@ import java.util.List;
 
 public class EmployeeService {
     private final ItemRepository itemRepository;
-    private NotificationRepository notificationRepository;
-    private RecommendationService recommendationService;
+    private final NotificationRepository notificationRepository;
+    private final RecommendationService recommendationService;
 
     public EmployeeService() {
         notificationRepository = new NotificationRepository();
@@ -27,18 +29,17 @@ public class EmployeeService {
         recommendationService = new RecommendationService();
     }
 
+
     public void performEmployeeTasks(int userId) {
         try {
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+            BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
             EmployeeAction choice;
-
             do {
-//                viewNotifications();
                 displayMenu();
 
                 int choiceValue;
                 try {
-                    choiceValue = Integer.parseInt(bufferedReader.readLine());
+                    choiceValue = Integer.parseInt(reader.readLine());
                     choice = EmployeeAction.fromValue(choiceValue);
                 } catch (IllegalArgumentException e) {
                     System.out.println("Invalid input. Please enter a number.");
@@ -119,9 +120,11 @@ public class EmployeeService {
 
             System.out.println("Order placed successfully!");
 
-        } catch (IOException | SQLException | ClassNotFoundException e) {
+        } catch (IOException e) {
             e.printStackTrace();
             System.out.println("Error placing order. Please try again.");
+        } catch (DatabaseException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -163,8 +166,8 @@ public class EmployeeService {
 
         } catch (IOException | NumberFormatException e) {
             System.out.println("Invalid input. Please try again.");
-        } catch (SQLException | ClassNotFoundException e) {
-            System.out.println("Error: " + e.getMessage());
+        } catch (DatabaseException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -186,9 +189,8 @@ public class EmployeeService {
                 }
             }
 
-        } catch (SQLException | ClassNotFoundException e) {
-            e.printStackTrace();
-            System.out.println("Error fetching order history. Please try again.");
+        }  catch (DatabaseException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -227,8 +229,8 @@ public class EmployeeService {
 
         } catch (IOException | NumberFormatException e) {
             System.out.println("Invalid input. Please try again.");
-        } catch (SQLException | ClassNotFoundException e) {
-            System.out.println("Error: " + e.getMessage());
+        }  catch (DatabaseException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -239,8 +241,8 @@ public class EmployeeService {
             for (String notification : notifications) {
                 System.out.println(notification);
             }
-        } catch (SQLException | ClassNotFoundException e) {
-            e.printStackTrace();
+        }catch (DatabaseException e) {
+            throw new RuntimeException(e);
         }
     }
 

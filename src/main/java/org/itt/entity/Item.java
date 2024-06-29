@@ -14,17 +14,6 @@ public class Item implements Serializable {
     private int pollCount;
     public Item() {
     }
-
-    public Item(int itemId, String itemName, double price, String availabilityStatus,
-                String mealType, String description, double averageRating) {
-        this.itemId = itemId;
-        this.itemName = itemName;
-        this.price = price;
-        this.availabilityStatus = availabilityStatus;
-        this.mealType = mealType;
-        this.description = description;
-        this.averageRating = averageRating;
-    }
     public int getItemId() {
         return itemId;
     }

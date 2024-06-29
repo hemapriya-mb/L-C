@@ -2,6 +2,7 @@ package org.itt.service;
 
 import org.itt.dao.FeedbackRepository;
 import org.itt.entity.Feedback;
+import org.itt.exception.DatabaseException;
 
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -9,8 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 public class RecommendationService {
-
-    private FeedbackRepository feedbackRepository;
+    private final FeedbackRepository feedbackRepository;
 
     public RecommendationService() {
         feedbackRepository = new FeedbackRepository();
@@ -38,8 +38,8 @@ public class RecommendationService {
                 System.out.println("-----------------------------------------");
             }
 
-        } catch (SQLException | ClassNotFoundException e) {
-            e.printStackTrace();
+        } catch (DatabaseException e) {
+            throw new RuntimeException(e);
         }
     }
     private class ItemFeedbackSummary {

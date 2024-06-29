@@ -1,37 +1,44 @@
 package org.itt.dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import org.itt.exception.DatabaseException;
+
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class NotificationRepository {
-    public void addNotification(String sender, String message) throws SQLException, ClassNotFoundException {
-        String query = "INSERT INTO notifications (sender, message) VALUES (?, ?)";
-        try (Connection connection = DataBaseConnector.getInstance().getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-            preparedStatement.setString(1, sender);
-            preparedStatement.setString(2, message);
-            preparedStatement.executeUpdate();
+
+    public void addNotification(String sender, String message) throws DatabaseException {
+        String query = "INSERT INTO notification (sender, message) VALUES (?, ?)";
+
+        try (Connection connection = DataBaseConnector.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, sender);
+            statement.setString(2, message);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new DatabaseException("Failed to add notification", e);
         }
     }
 
-    public List<String> getNotifications() throws SQLException, ClassNotFoundException {
-        List<String> notifications = new ArrayList<String>();
-        String query = "SELECT sender, message, timestamp FROM notifications ORDER BY timestamp DESC";
-        try (Connection connection = DataBaseConnector.getInstance().getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(query);
+    public List<String> getNotifications() throws DatabaseException {
+        List<String> notifications = new ArrayList<>();
+        String query = "SELECT sender, message, timestamp FROM notification ORDER BY timestamp DESC";
 
-             ResultSet resultSet = preparedStatement.executeQuery()) {
+        try (Connection connection = DataBaseConnector.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query);
+             ResultSet resultSet = statement.executeQuery()) {
+
             while (resultSet.next()) {
                 String sender = resultSet.getString("sender");
                 String message = resultSet.getString("message");
                 String timestamp = resultSet.getTimestamp("timestamp").toString();
                 notifications.add("[" + timestamp + "] " + sender + ": " + message);
             }
+        } catch (SQLException e) {
+            throw new DatabaseException("Failed to retrieve notifications", e);
         }
+
         return notifications;
     }
 }

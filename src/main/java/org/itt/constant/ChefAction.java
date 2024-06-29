@@ -1,23 +1,23 @@
 package org.itt.constant;
 
 public enum ChefAction {
-    VIEW_HIGH_RATED_ITEMS(1),
-    SELECT_ITEMS_FOR_NEXT_DAY(2),
-    EXIT(3);
+    VIEW_HIGH_RATED_ITEMS("View High Rated Items"),
+    SELECT_ITEMS_FOR_NEXT_DAY("Select Items for Next Day"),
+    EXIT("Exit");
 
-    private final int value;
+    private final String description;
 
-    ChefAction(int value) {
-        this.value = value;
+    ChefAction(String description) {
+        this.description = description;
     }
 
-    public int getValue() {
-        return value;
+    public String getDescription() {
+        return description;
     }
 
     public static ChefAction fromValue(int value) {
         for (ChefAction action : values()) {
-            if (action.getValue() == value) {
+            if (action.ordinal() + 1 == value) {
                 return action;
             }
         }

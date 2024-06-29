@@ -5,7 +5,6 @@ import java.io.Serializable;
 public class User implements Serializable {
     private int userId;
     private String name;
-
     private String password;
     private String role;
 
@@ -50,6 +49,4 @@ public class User implements Serializable {
     public void setRole(String role) {
         this.role = role;
     }
-
-
 }

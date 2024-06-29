@@ -1,45 +1,55 @@
 package org.itt.dao;
 
+import org.itt.exception.DatabaseException;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class NextDayItemRepository {
 
-    public void addNextDayItems(int[] itemIds) throws SQLException, ClassNotFoundException {
-        String INSERT_NEXT_DAY_ITEM_QUERY = "INSERT INTO next_day_item (item_id) VALUES (?) " +
+    public void addNextDayItems(int[] itemIds) throws DatabaseException {
+        String query = "INSERT INTO next_day_item (item_id) VALUES (?) " +
                 "ON DUPLICATE KEY UPDATE poll_count = poll_count + 1";
-        Connection connection = DataBaseConnector.getInstance().getConnection();
 
-        try (PreparedStatement stmt = connection.prepareStatement(INSERT_NEXT_DAY_ITEM_QUERY)) {
+        try (Connection connection = DataBaseConnector.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
             for (int itemId : itemIds) {
-                stmt.setInt(1, itemId);
-                stmt.executeUpdate();
+                statement.setInt(1, itemId);
+                statement.executeUpdate();
             }
+        } catch (SQLException e) {
+            throw new DatabaseException("Failed to add next day items", e);
         }
     }
 
-    public List<Integer> getNextDayItemIds() throws SQLException, ClassNotFoundException {
+    public List<Integer> getNextDayItemIds() throws DatabaseException {
         List<Integer> itemIds = new ArrayList<>();
         String query = "SELECT item_id FROM next_day_item";
-        try (Connection connection = DataBaseConnector.getInstance().getConnection();
+
+        try (Connection connection = DataBaseConnector.getConnection();
              Statement statement = connection.createStatement();
              ResultSet resultSet = statement.executeQuery(query)) {
+
             while (resultSet.next()) {
                 itemIds.add(resultSet.getInt("item_id"));
             }
+        } catch (SQLException e) {
+            throw new DatabaseException("Failed to retrieve next day item IDs", e);
         }
+
         return itemIds;
     }
 
-    public void incrementPollCount(int itemId) throws SQLException, ClassNotFoundException {
+    public void incrementPollCount(int itemId) throws DatabaseException {
         String query = "UPDATE next_day_item SET poll_count = poll_count + 1 WHERE item_id = ?";
-        try (Connection connection = DataBaseConnector.getInstance().getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-            preparedStatement.setInt(1, itemId);
-            preparedStatement.executeUpdate();
+
+        try (Connection connection = DataBaseConnector.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, itemId);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new DatabaseException("Failed to increment poll count", e);
         }
     }
-
 }
-

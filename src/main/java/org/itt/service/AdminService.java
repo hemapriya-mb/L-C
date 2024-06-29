@@ -5,231 +5,130 @@ import org.itt.dao.ItemRepository;
 import org.itt.dao.UserRepository;
 import org.itt.entity.Item;
 import org.itt.entity.User;
+import org.itt.exception.DatabaseException;
 import org.itt.exception.InvalidInputException;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.sql.SQLException;
 import java.util.List;
 
 public class AdminService {
-    private final UserService userService;
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
 
     public AdminService() {
-        this.userService = new UserService();
         this.userRepository = new UserRepository();
         this.itemRepository = new ItemRepository();
     }
 
-    public void performAdminTasks() {
-        try {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-            AdminAction choice;
-            do {
-                displayMenu();
-
-                int choiceValue;
-                try {
-                    choiceValue = Integer.parseInt(reader.readLine());
-                    choice = AdminAction.fromValue(choiceValue);
-                } catch (IllegalArgumentException e) {
-                    System.out.println("Invalid input. Please enter a number.");
-                    choice = null;
-                }
-
-                if (choice != null) {
-                    switch (choice) {
-                        case ADD_NEW_USER:
-                            addNewUser();
-                            break;
-                        case GET_ITEM_LIST:
-                            getAllItem();
-                            break;
-                        case ADD_MENU_ITEM:
-                            addMenuItem();
-                            break;
-                        case UPDATE_MENU_ITEM:
-                            updateMenuItem();
-                            break;
-                        case DELETE_MENU_ITEM:
-                            deleteMenuItem();
-                            break;
-                        case EXIT:
-                            System.out.println("Exiting...");
-                            break;
-                        default:
-                            System.out.println("Invalid choice.");
-                    }
-                }
-            } while (choice != AdminAction.EXIT);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void displayMenu() {
-        System.out.println("Select operation from menu :");
+    public String getAdminMenu() {
+        StringBuilder menu = new StringBuilder("Select operation from menu:\n");
         for (AdminAction choice : AdminAction.values()) {
-            System.out.println(choice.getValue() + ". " + choice.getDescription());
+            menu.append(choice.getValue()).append(". ").append(choice.getDescription()).append("\n");
         }
-        System.out.print("Enter your choice: ");
+        return menu.toString();
     }
 
-    private void addNewUser() {
+    public String executeAdminTask(int choiceValue) {
         try {
-            User newUser = userService.getUserDetail();
-            userRepository.addUser(newUser);
-        } catch (IOException | InvalidInputException | SQLException e) {
-            e.printStackTrace();
+            AdminAction choice = AdminAction.fromValue(choiceValue);
+
+            switch (choice) {
+                case GET_ITEM_LIST:
+                    return getAllItem();
+                case EXIT:
+                    return "Exiting...";
+                default:
+                    return "Invalid choice.";
+            }
+        } catch (IllegalArgumentException | InvalidInputException e) {
+            return e.getMessage();
         }
     }
 
-    private void getAllItem() {
-        System.out.println("\nDisplaying all items in the table...");
+    public String addNewUser(String name, String role, String password) {
+        try {
+            if (password.length() < 8) {
+                throw new InvalidInputException("Password must be at least 8 characters long.");
+            }
 
-        ItemRepository itemRepository = new ItemRepository();
+            User newUser = new User(0, name, role, password);
+            userRepository.addUser(newUser);
+            return "User added successfully.";
+        } catch (InvalidInputException | DatabaseException e) {
+            return e.getMessage();
+        }
+    }
+
+    public String addMenuItem(String itemName, double price, String availabilityStatus, String mealType, String description) {
+        try {
+            Item newItem = new Item();
+            newItem.setItemName(itemName);
+            newItem.setPrice(price);
+            newItem.setAvailabilityStatus(availabilityStatus);
+            newItem.setMealType(mealType);
+            newItem.setDescription(description);
+
+            itemRepository.addItem(newItem);
+            return "Item added successfully.";
+        } catch (DatabaseException e) {
+            return e.getMessage();
+        }
+    }
+
+    public String updateMenuItem(int itemId, String itemName, double price, String availabilityStatus, String mealType, String description) {
+        try {
+            if (!itemRepository.checkItemPresent(itemId)) {
+                return "Item with ID " + itemId + " does not exist.";
+            }
+
+            Item updatedItem = new Item();
+            updatedItem.setItemId(itemId);
+            updatedItem.setItemName(itemName);
+            updatedItem.setPrice(price);
+            updatedItem.setAvailabilityStatus(availabilityStatus);
+            updatedItem.setMealType(mealType);
+            updatedItem.setDescription(description);
+
+            boolean isUpdated = itemRepository.updateItem(updatedItem);
+
+            return isUpdated ? "Item updated successfully." : "Item could not be updated.";
+        } catch (DatabaseException e) {
+            return e.getMessage();
+        }
+    }
+
+    public String deleteMenuItem(int itemId) {
+        try {
+            boolean isDeleted = itemRepository.deleteItem(itemId);
+            return isDeleted ? "Item deleted successfully." : "Item not found or could not be deleted.";
+        } catch (DatabaseException e) {
+            return e.getMessage();
+        }
+    }
+
+    private String getAllItem() {
+        StringBuilder result = new StringBuilder("\nDisplaying all items in the table...\n");
+
         try {
             List<Item> items = itemRepository.getAllItems();
             if (items.isEmpty()) {
-                System.out.println("No items found.");
+                return "No items found.";
             } else {
-                System.out.printf("%-10s %-20s %-10s %-20s %-15s %-30s%n", "Item ID", "Item Name", "Price", "Availability", "Meal Type", "Description");
-                System.out.println("-------------------------------------------------------------------------------------------------------------");
+                result.append(String.format("%-10s %-20s %-10s %-20s %-15s %-30s%n", "Item ID", "Item Name", "Price", "Availability", "Meal Type", "Description"));
+                result.append("-------------------------------------------------------------------------------------------------------------\n");
 
                 for (Item item : items) {
-                    System.out.printf("%-10d %-20s %-10.2f %-20s %-15s %-30s%n",
+                    result.append(String.format("%-10d %-20s %-10.2f %-20s %-15s %-30s%n",
                             item.getItemId(),
                             item.getItemName(),
                             item.getPrice(),
                             item.getAvailabilityStatus(),
                             item.getMealType(),
-                            item.getDescription());
+                            item.getDescription()));
                 }
+                return result.toString();
             }
-        } catch (SQLException | ClassNotFoundException e) {
-            e.printStackTrace();
-            System.out.println("Error fetching items from the database.");
+        } catch (DatabaseException e) {
+            return e.getMessage();
         }
-    }
-
-    private void addMenuItem() {
-        ItemService itemService = new ItemService();
-        try {
-            Item newItem = itemService.getItemDetails();
-            itemRepository.addItem(newItem);
-            System.out.println("item added successfully");
-
-        } catch (InvalidInputException | IOException e) {
-            System.out.println(e.getMessage());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void updateMenuItem() {
-        try {
-            int itemId = getItemIdToUpdate();
-            ItemRepository itemRepository = new ItemRepository();
-
-            if (!itemRepository.checkItemPresent(itemId)) {
-                throw new InvalidInputException("Item with ID " + itemId + " does not exist.");
-            }
-
-            Item updatedItem = getUpdatedItemDetails(itemId);
-
-            boolean isUpdated = itemRepository.updateItem(updatedItem);
-
-            if (isUpdated) {
-                System.out.println("Item updated successfully.");
-            } else {
-                System.out.println("Item could not be updated.");
-            }
-        } catch (InvalidInputException | IOException | SQLException | ClassNotFoundException e) {
-            System.out.println(e.getMessage());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private int getItemIdToUpdate() throws IOException, InvalidInputException {
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
-        int maxAttempts = 3;
-
-        for (int i = 0; i < maxAttempts; i++) {
-            System.out.print("Enter item ID to update: ");
-            try {
-                String itemIdStr = bufferedReader.readLine();
-                int itemId = Integer.parseInt(itemIdStr);
-                if (itemId > 0) {
-                    return itemId;
-                } else {
-                    System.out.println("Item ID must be a positive number. Please try again.");
-                }
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid input. Please enter a valid number.");
-            }
-        }
-        throw new InvalidInputException("Invalid item ID input. You have reached the maximum number of attempts.");
-    }
-
-    private Item getUpdatedItemDetails(int itemId) throws IOException, InvalidInputException {
-        ItemService itemService = new ItemService();
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
-        Item item = new Item();
-        item.setItemId(itemId);
-
-        System.out.print("Enter new item name: ");
-        item.setItemName(bufferedReader.readLine());
-
-        item.setPrice(itemService.getValidPrice(bufferedReader));
-        item.setAvailabilityStatus(itemService.getValidAvailabilityStatus(bufferedReader));
-        item.setMealType(itemService.getValidMealType(bufferedReader));
-
-        System.out.print("Enter new item description: ");
-        item.setDescription(bufferedReader.readLine());
-
-        return item;
-    }
-
-    private void deleteMenuItem() {
-        try {
-            int itemId = getItemIdToDelete();
-
-            boolean isDeleted = itemRepository.deleteItem(itemId);
-
-            if (isDeleted) {
-                System.out.println("Item deleted successfully.");
-            } else {
-                System.out.println("Item not found or could not be deleted.");
-            }
-        } catch (InvalidInputException | IOException e) {
-            System.out.println(e.getMessage());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private int getItemIdToDelete() throws IOException, InvalidInputException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-        int maxAttempts = 3;
-
-        for (int i = 0; i < maxAttempts; i++) {
-            System.out.print("Enter item ID to delete: ");
-            try {
-                String itemIdStr = reader.readLine();
-                int itemId = Integer.parseInt(itemIdStr);
-                if (itemId > 0) {
-                    return itemId;
-                } else {
-                    System.out.println("Item ID must be a positive number. Please try again.");
-                }
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid input. Please enter a valid number.");
-            }
-        }
-        throw new InvalidInputException("Invalid item ID input. You have reached the maximum number of attempts.");
     }
 }
