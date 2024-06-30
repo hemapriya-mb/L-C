@@ -1,5 +1,6 @@
 package org.itt.dao;
 
+import org.itt.entity.Notification;
 import org.itt.exception.DatabaseException;
 
 import java.sql.*;
@@ -8,12 +9,12 @@ import java.util.List;
 
 public class NotificationRepository {
 
-    public void addNotification(String sender, String message) throws DatabaseException {
-        String query = "INSERT INTO notification (sender, message) VALUES (?, ?)";
+    public void addNotification(int userId, String message) throws DatabaseException {
+        String query = "INSERT INTO notification (user_id, message) VALUES (?, ?)";
 
         try (Connection connection = DataBaseConnector.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, sender);
+            statement.setInt(1, userId);
             statement.setString(2, message);
             statement.executeUpdate();
         } catch (SQLException e) {
@@ -21,24 +22,41 @@ public class NotificationRepository {
         }
     }
 
-    public List<String> getNotifications() throws DatabaseException {
-        List<String> notifications = new ArrayList<>();
-        String query = "SELECT sender, message, timestamp FROM notification ORDER BY timestamp DESC";
+    public List<Notification> getNotificationsByUserId(int userId) throws DatabaseException {
+        List<Notification> notifications = new ArrayList<>();
+        String query = "SELECT * FROM notification WHERE user_id = ? AND is_read = FALSE";
 
         try (Connection connection = DataBaseConnector.getConnection();
-             PreparedStatement statement = connection.prepareStatement(query);
-             ResultSet resultSet = statement.executeQuery()) {
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, userId);
 
-            while (resultSet.next()) {
-                String sender = resultSet.getString("sender");
-                String message = resultSet.getString("message");
-                String timestamp = resultSet.getTimestamp("timestamp").toString();
-                notifications.add("[" + timestamp + "] " + sender + ": " + message);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    Notification notification = new Notification();
+                    notification.setNotificationId(resultSet.getInt("notification_id"));
+                    notification.setUserId(resultSet.getInt("user_id"));
+                    notification.setMessage(resultSet.getString("message"));
+                    notification.setIsRead(resultSet.getBoolean("is_read"));
+                    notification.setCreatedDate(resultSet.getTimestamp("created_date"));
+                    notifications.add(notification);
+                }
             }
         } catch (SQLException e) {
             throw new DatabaseException("Failed to retrieve notifications", e);
         }
 
         return notifications;
+    }
+
+    public void markNotificationsAsRead(int userId) throws DatabaseException {
+        String query = "UPDATE notification SET is_read = TRUE WHERE user_id = ? AND is_read = FALSE";
+
+        try (Connection connection = DataBaseConnector.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, userId);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new DatabaseException("Failed to mark notifications as read", e);
+        }
     }
 }

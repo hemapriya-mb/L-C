@@ -1,14 +1,14 @@
 package org.itt.entity;
 
 public class Feedback {
+    private int feedbackId;
     private int userId;
     private int orderId;
     private int itemId;
     private int rating;
     private String comment;
 
-    public Feedback() {
-    }
+    public Feedback() {}
 
     public Feedback(int userId, int orderId, int itemId, int rating, String comment) {
         this.userId = userId;
@@ -16,6 +16,14 @@ public class Feedback {
         this.itemId = itemId;
         this.rating = rating;
         this.comment = comment;
+    }
+
+    public int getFeedbackId() {
+        return feedbackId;
+    }
+
+    public void setFeedbackId(int feedbackId) {
+        this.feedbackId = feedbackId;
     }
 
     public int getUserId() {

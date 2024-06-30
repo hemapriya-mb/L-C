@@ -27,14 +27,17 @@ public class Client {
                     String responseMessage = login(user);
                     System.out.println(responseMessage);
 
-                    if (responseMessage.startsWith("Login successful")) {
-                        String role = responseMessage.split(":")[1].trim(); // Assume responseMessage is like "Login successful:admin"
-                        if ("admin".equalsIgnoreCase(role)) {
-                            AdminTaskClient adminTaskClient = new AdminTaskClient(objectInputStream, objectOutputStream);
-                            adminTaskClient.handleAdminTasks();
-                        } else if ("chef".equalsIgnoreCase(role)) {
+                    if (responseMessage.startsWith("You have logged in as:")) {
+                        String role = responseMessage.split(":")[1];
+                        if (role.trim().equals("EMPLOYEE")) {
+                            EmployeeTaskClient employeeTaskClient = new EmployeeTaskClient(objectInputStream, objectOutputStream);
+                            employeeTaskClient.handleEmployeeTasks(user.getUserId());
+                        } else if (role.trim().equals("CHEF")) {
                             ChefTaskClient chefTaskClient = new ChefTaskClient(objectInputStream, objectOutputStream);
                             chefTaskClient.handleChefTasks();
+                        } else if (role.trim().equals("ADMIN")) {
+                            AdminTaskClient adminTaskClient = new AdminTaskClient(objectInputStream, objectOutputStream);
+                            adminTaskClient.handleAdminTasks();
                         }
                     }
 

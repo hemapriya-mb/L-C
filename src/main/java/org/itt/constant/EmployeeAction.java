@@ -1,23 +1,27 @@
 package org.itt.constant;
 
 public enum EmployeeAction {
-    ORDER_FOOD(1),
-    GIVE_FEEDBACK(2),
-    VIEW_ORDER_HISTORY(3),
-    POLL_FOR_NEXT_DAY_ITEMS(4),
-    VIEW_NOTIFICATIONS(5),
-    VIEW_RECOMMENDATIONS(6),
-    EXIT(7);
+    ORDER_FOOD("Order Food"),
+    VIEW_ORDER_HISTORY("View Order History"),
+    VIEW_NOTIFICATIONS("View Notifications"),
+    GIVE_FEEDBACK("Give Feedback"),
+    POLL_FOR_NEXT_DAY_ITEMS("Poll for Next Day Items"),
+    GET_RECOMMENDATIONS("Get Recommendations"),
+    EXIT("Exit");
 
-    private final int value;
+    private final String description;
 
-    EmployeeAction(int value) {
-        this.value = value;
+    EmployeeAction(String description) {
+        this.description = description;
+    }
+
+    public String getDescription() {
+        return description;
     }
 
     public static EmployeeAction fromValue(int value) {
         for (EmployeeAction action : values()) {
-            if (action.value == value) {
+            if (action.ordinal() + 1 == value) {
                 return action;
             }
         }

@@ -4,6 +4,8 @@ import org.itt.entity.User;
 import org.itt.exception.DatabaseException;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class UserRepository {
 
@@ -42,5 +44,23 @@ public class UserRepository {
         } catch (SQLException e) {
             throw new DatabaseException("Failed to add user", e);
         }
+    }
+
+    public List<Integer> getAllEmployeeUserIds() throws DatabaseException {
+        List<Integer> userIds = new ArrayList<>();
+        String query = "SELECT user_id FROM user WHERE role = 'Employee'";
+
+        try (Connection connection = DataBaseConnector.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query);
+             ResultSet resultSet = statement.executeQuery()) {
+
+            while (resultSet.next()) {
+                userIds.add(resultSet.getInt("user_id"));
+            }
+        } catch (SQLException e) {
+            throw new DatabaseException("Failed to retrieve employee user IDs", e);
+        }
+
+        return userIds;
     }
 }

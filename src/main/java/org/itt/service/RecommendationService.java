@@ -4,7 +4,6 @@ import org.itt.dao.FeedbackRepository;
 import org.itt.entity.Feedback;
 import org.itt.exception.DatabaseException;
 
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,10 +15,11 @@ public class RecommendationService {
         feedbackRepository = new FeedbackRepository();
     }
 
-    public void generateRecommendations() {
+    public String generateRecommendations() {
+        StringBuilder recommendations = new StringBuilder();
         try {
             List<Feedback> allFeedback = feedbackRepository.getAllFeedback();
-            Map<Integer, ItemFeedbackSummary> itemFeedbackMap = new HashMap<Integer, ItemFeedbackSummary>();
+            Map<Integer, ItemFeedbackSummary> itemFeedbackMap = new HashMap<>();
 
             for (Feedback feedback : allFeedback) {
                 int itemId = feedback.getItemId();
@@ -32,16 +32,18 @@ public class RecommendationService {
             }
 
             for (ItemFeedbackSummary summary : itemFeedbackMap.values()) {
-                System.out.println("Item ID: " + summary.getItemId());
-                System.out.println("Average Rating: " + summary.getAverageRating());
-                System.out.println("Feedback Summary: " + summary.getCommentSummary());
-                System.out.println("-----------------------------------------");
+                recommendations.append("Item ID: ").append(summary.getItemId()).append("\n")
+                        .append("Average Rating: ").append(summary.getAverageRating()).append("\n")
+                        .append("Feedback Summary: ").append(summary.getCommentSummary()).append("\n")
+                        .append("-----------------------------------------\n");
             }
 
         } catch (DatabaseException e) {
             throw new RuntimeException(e);
         }
+        return recommendations.toString();
     }
+
     private class ItemFeedbackSummary {
         private int itemId;
         private int totalRating;
@@ -52,7 +54,7 @@ public class RecommendationService {
             this.itemId = itemId;
             this.totalRating = 0;
             this.ratingCount = 0;
-            this.commentCountMap = new HashMap<String, Integer>();
+            this.commentCountMap = new HashMap<>();
         }
 
         public void addRating(int rating) {
@@ -83,4 +85,5 @@ public class RecommendationService {
             }
             return summary.toString();
         }
-    }}
+    }
+}

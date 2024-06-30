@@ -4,6 +4,7 @@ import org.itt.constant.ChefAction;
 import org.itt.dao.ItemRepository;
 import org.itt.dao.NextDayItemRepository;
 import org.itt.dao.NotificationRepository;
+import org.itt.dao.UserRepository;
 import org.itt.entity.Item;
 import org.itt.exception.DatabaseException;
 
@@ -14,11 +15,13 @@ public class ChefService {
     private final ItemRepository itemRepository;
     private final NextDayItemRepository nextDayItemRepository;
     private final NotificationRepository notificationRepository;
+    private final UserRepository userRepository;
 
     public ChefService() {
         this.itemRepository = new ItemRepository();
         this.nextDayItemRepository = new NextDayItemRepository();
         this.notificationRepository = new NotificationRepository();
+        this.userRepository = new UserRepository();
     }
 
     public String getChefMenu() {
@@ -72,7 +75,7 @@ public class ChefService {
     }
 
     private void notifyEmployees(int[] itemIds) throws SQLException, ClassNotFoundException, DatabaseException {
-        StringBuilder messageBuilder = new StringBuilder("Items selected for next day: ");
+        StringBuilder messageBuilder = new StringBuilder("An item as been added for next day menu polling with id: ");
         for (int i = 0; i < itemIds.length; i++) {
             messageBuilder.append(itemIds[i]);
             if (i < itemIds.length - 1) {
@@ -80,6 +83,9 @@ public class ChefService {
             }
         }
         String message = messageBuilder.toString();
-        notificationRepository.addNotification("Chef", message);
+        List<Integer> employeeUserIds = userRepository.getAllEmployeeUserIds();
+        for (int userId : employeeUserIds) {
+            notificationRepository.addNotification(userId, message);
+        }
     }
 }

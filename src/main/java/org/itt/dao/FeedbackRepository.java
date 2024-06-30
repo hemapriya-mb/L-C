@@ -36,6 +36,7 @@ public class FeedbackRepository {
             try (ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
                     Feedback feedback = new Feedback();
+                    feedback.setFeedbackId(resultSet.getInt("feedback_id"));
                     feedback.setUserId(resultSet.getInt("user_id"));
                     feedback.setOrderId(resultSet.getInt("order_id"));
                     feedback.setItemId(resultSet.getInt("item_id"));
@@ -61,6 +62,7 @@ public class FeedbackRepository {
 
             while (resultSet.next()) {
                 Feedback feedback = new Feedback();
+                feedback.setFeedbackId(resultSet.getInt("feedback_id"));
                 feedback.setUserId(resultSet.getInt("user_id"));
                 feedback.setOrderId(resultSet.getInt("order_id"));
                 feedback.setItemId(resultSet.getInt("item_id"));

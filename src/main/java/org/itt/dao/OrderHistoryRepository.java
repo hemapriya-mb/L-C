@@ -9,9 +9,25 @@ import java.util.List;
 
 public class OrderHistoryRepository {
 
+    public void addOrder(OrderHistory orderHistory) throws DatabaseException {
+        String query = "INSERT INTO order_history (user_id, item_id) VALUES (?, ?)";
+
+        try (Connection connection = DataBaseConnector.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, orderHistory.getUserId());
+            statement.setInt(2, orderHistory.getItemId());
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new DatabaseException("Failed to add order", e);
+        }
+    }
+
     public List<OrderHistory> getOrderHistoryByUserId(int userId) throws DatabaseException {
         List<OrderHistory> orderHistoryList = new ArrayList<>();
-        String query = "SELECT * FROM order_history WHERE user_id = ?";
+        String query = "SELECT oh.order_id, oh.item_id, i.item_name, oh.order_date " +
+                "FROM order_history oh " +
+                "JOIN item i ON oh.item_id = i.item_id " +
+                "WHERE oh.user_id = ?";
 
         try (Connection connection = DataBaseConnector.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
@@ -21,9 +37,9 @@ public class OrderHistoryRepository {
                 while (resultSet.next()) {
                     OrderHistory orderHistory = new OrderHistory();
                     orderHistory.setOrderId(resultSet.getInt("order_id"));
-                    orderHistory.setUserId(resultSet.getInt("user_id"));
                     orderHistory.setItemId(resultSet.getInt("item_id"));
-                    orderHistory.setOrderDate(resultSet.getDate("order_date"));
+                    orderHistory.setItemName(resultSet.getString("item_name"));
+                    orderHistory.setOrderDate(resultSet.getTimestamp("order_date").toLocalDateTime().toLocalDate());
                     orderHistoryList.add(orderHistory);
                 }
             }
@@ -32,19 +48,5 @@ public class OrderHistoryRepository {
         }
 
         return orderHistoryList;
-    }
-
-    public void addOrder(OrderHistory orderHistory) throws DatabaseException {
-        String query = "INSERT INTO order_history (user_id, item_id, order_date) VALUES (?, ?, ?)";
-
-        try (Connection connection = DataBaseConnector.getConnection();
-             PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setInt(1, orderHistory.getUserId());
-            statement.setInt(2, orderHistory.getItemId());
-            statement.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
-            statement.executeUpdate();
-        } catch (SQLException e) {
-            throw new DatabaseException("Failed to add order history", e);
-        }
     }
 }

@@ -17,7 +17,7 @@ public class LoginController extends Thread {
         this.userRepository = new UserRepository();
     }
 
-    public void run()  {
+    public void run(){
         try (InputStream inputStream = socket.getInputStream();
              OutputStream outputStream = socket.getOutputStream();
              ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
@@ -31,7 +31,7 @@ public class LoginController extends Thread {
 
             if (user != null) {
                 Server.logActivity("Login", user.getUserId());
-                objectOutputStream.writeObject("Login successful:" + user.getRole());
+                objectOutputStream.writeObject("You have logged in as:" + user.getRole());
 
                 if ("admin".equalsIgnoreCase(user.getRole())) {
                     AdminTaskController adminTaskController = new AdminTaskController();
@@ -39,6 +39,9 @@ public class LoginController extends Thread {
                 } else if ("chef".equalsIgnoreCase(user.getRole())) {
                     ChefTaskController chefTaskController = new ChefTaskController();
                     chefTaskController.handleChefTasks(objectInputStream, objectOutputStream);
+                } else if ("employee".equalsIgnoreCase(user.getRole())) {
+                    EmployeeTaskController employeeTaskController = new EmployeeTaskController();
+                    employeeTaskController.handleEmployeeTasks(objectInputStream, objectOutputStream);
                 }
             } else {
                 objectOutputStream.writeObject("Login failed!");

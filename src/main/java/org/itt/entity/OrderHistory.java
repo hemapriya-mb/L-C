@@ -1,15 +1,13 @@
 package org.itt.entity;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 public class OrderHistory {
     private int orderId;
     private int userId;
     private int itemId;
-    private Date orderDate;
-
-    public OrderHistory() {
-    }
+    private String itemName;
+    private LocalDate orderDate;
 
     public int getOrderId() {
         return orderId;
@@ -35,11 +33,19 @@ public class OrderHistory {
         this.itemId = itemId;
     }
 
-    public Date getOrderDate() {
+    public String getItemName() {
+        return itemName;
+    }
+
+    public void setItemName(String itemName) {
+        this.itemName = itemName;
+    }
+
+    public LocalDate getOrderDate() {
         return orderDate;
     }
 
-    public void setOrderDate(Date orderDate) {
+    public void setOrderDate(LocalDate orderDate) {
         this.orderDate = orderDate;
     }
 }
