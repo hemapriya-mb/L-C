@@ -9,9 +9,7 @@ public class Item implements Serializable {
     private String availabilityStatus;
     private String mealType;
     private String description;
-    private double rating;
     private double averageRating;
-    private int pollCount;
     public Item() {
     }
     public int getItemId() {
@@ -62,13 +60,6 @@ public class Item implements Serializable {
         this.description = description;
     }
 
-    public double getRating() {
-        return rating;
-    }
-
-    public void setRating(double rating) {
-        this.rating = rating;
-    }
 
     public double getAverageRating() {
         return averageRating;
@@ -76,14 +67,6 @@ public class Item implements Serializable {
 
     public void setAverageRating(double averageRating) {
         this.averageRating = averageRating;
-    }
-
-    public int getPollCount() {
-        return pollCount;
-    }
-
-    public void setPollCount(int pollCount) {
-        this.pollCount = pollCount;
     }
 
 }

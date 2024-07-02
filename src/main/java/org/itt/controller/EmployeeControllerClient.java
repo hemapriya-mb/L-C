@@ -1,4 +1,4 @@
-package org.itt.utility;
+package org.itt.controller;
 
 import org.itt.constant.EmployeeAction;
 
@@ -8,12 +8,12 @@ import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
-public class EmployeeTaskClient {
+public class EmployeeControllerClient {
 
     private final ObjectInputStream objectInputStream;
     private final ObjectOutputStream objectOutputStream;
 
-    public EmployeeTaskClient(ObjectInputStream objectInputStream, ObjectOutputStream objectOutputStream) {
+    public EmployeeControllerClient(ObjectInputStream objectInputStream, ObjectOutputStream objectOutputStream) {
         this.objectInputStream = objectInputStream;
         this.objectOutputStream = objectOutputStream;
     }

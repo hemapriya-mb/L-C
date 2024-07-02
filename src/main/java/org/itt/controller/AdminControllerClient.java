@@ -1,8 +1,7 @@
-package org.itt.utility;
+package org.itt.controller;
 
 import org.itt.constant.AdminAction;
 import org.itt.entity.Item;
-import org.itt.entity.User;
 import org.itt.exception.InvalidInputException;
 import org.itt.service.ItemService;
 import org.itt.service.UserService;
@@ -13,14 +12,14 @@ import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
-public class AdminTaskClient {
+public class AdminControllerClient {
 
     private final ObjectInputStream objectInputStream;
     private final ObjectOutputStream objectOutputStream;
     private final UserService userService;
     private final ItemService itemService;
 
-    public AdminTaskClient(ObjectInputStream objectInputStream, ObjectOutputStream objectOutputStream) {
+    public AdminControllerClient(ObjectInputStream objectInputStream, ObjectOutputStream objectOutputStream) {
         this.objectInputStream = objectInputStream;
         this.objectOutputStream = objectOutputStream;
         this.userService = new UserService();
@@ -48,10 +47,10 @@ public class AdminTaskClient {
 
                 switch (choice) {
                     case ADD_NEW_USER:
-                        handleAddUser(bufferedReader);
+                        handleAddUser();
                         break;
                     case ADD_MENU_ITEM:
-                        handleAddMenuItem(bufferedReader);
+                        handleAddMenuItem();
                         break;
                     case UPDATE_MENU_ITEM:
                         handleUpdateMenuItem(bufferedReader);
@@ -76,18 +75,20 @@ public class AdminTaskClient {
         }
     }
 
-    private void handleAddUser(BufferedReader bufferedReader) throws IOException {
+    private void handleAddUser() throws IOException {
         try {
-            User user = userService.getUserDetail();
-            objectOutputStream.writeObject(user.getName());
-            objectOutputStream.writeObject(user.getRole());
-            objectOutputStream.writeObject(user.getPassword());
+            String name = userService.getUserName();
+            String role = userService.getUserRole();
+            String password = userService.getValidPassword();
+            objectOutputStream.writeObject(name);
+            objectOutputStream.writeObject(role);
+            objectOutputStream.writeObject(password);
         } catch (InvalidInputException e) {
             System.out.println(e.getMessage());
         }
     }
 
-    private void handleAddMenuItem(BufferedReader bufferedReader) throws IOException {
+    private void handleAddMenuItem() throws IOException {
         try {
             Item item = itemService.getItemDetails();
             objectOutputStream.writeObject(item.getItemName());
@@ -101,20 +102,11 @@ public class AdminTaskClient {
     }
 
     private void handleUpdateMenuItem(BufferedReader bufferedReader) throws IOException {
-        try {
-            System.out.print("Enter item ID to update: ");
-            int itemId = Integer.parseInt(bufferedReader.readLine());
-            objectOutputStream.writeObject(itemId);
+        System.out.print("Enter item ID to update: ");
+        int itemId = Integer.parseInt(bufferedReader.readLine());
+        objectOutputStream.writeObject(itemId);
 
-            Item item = itemService.getItemDetails();
-            objectOutputStream.writeObject(item.getItemName());
-            objectOutputStream.writeObject(item.getPrice());
-            objectOutputStream.writeObject(item.getAvailabilityStatus());
-            objectOutputStream.writeObject(item.getMealType());
-            objectOutputStream.writeObject(item.getDescription());
-        } catch (InvalidInputException e) {
-            System.out.println(e.getMessage());
-        }
+        handleAddMenuItem();
     }
 
     private void handleDeleteMenuItem(BufferedReader bufferedReader) throws IOException {

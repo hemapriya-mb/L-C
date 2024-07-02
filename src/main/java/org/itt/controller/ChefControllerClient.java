@@ -1,4 +1,5 @@
-package org.itt.utility;
+package org.itt.controller;
+
 
 import org.itt.constant.ChefAction;
 
@@ -8,12 +9,12 @@ import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
-public class ChefTaskClient {
+public class ChefControllerClient {
 
     private final ObjectInputStream objectInputStream;
     private final ObjectOutputStream objectOutputStream;
 
-    public ChefTaskClient(ObjectInputStream objectInputStream, ObjectOutputStream objectOutputStream) {
+    public ChefControllerClient(ObjectInputStream objectInputStream, ObjectOutputStream objectOutputStream) {
         this.objectInputStream = objectInputStream;
         this.objectOutputStream = objectOutputStream;
     }
