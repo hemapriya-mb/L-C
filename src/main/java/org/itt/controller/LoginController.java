@@ -17,29 +17,28 @@ public class LoginController extends Thread {
         this.userRepository = new UserRepository();
     }
 
-    public void run(){
+    public void run() {
         try (InputStream inputStream = socket.getInputStream();
              OutputStream outputStream = socket.getOutputStream();
              ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
              ObjectInputStream objectInputStream = new ObjectInputStream(inputStream)) {
 
-            String userIdString = (String) objectInputStream.readObject();
-            int userId = Integer.parseInt(userIdString);
+            int userId = (Integer) objectInputStream.readObject();
             String password = (String) objectInputStream.readObject();
 
             User user = userRepository.getUserByUserIdAndPassword(userId, password);
 
             if (user != null) {
                 Server.logActivity("Login", user.getUserId());
-                objectOutputStream.writeObject("You have logged in as:" + user.getRole());
+                objectOutputStream.writeObject("Login successful:" + user.getRole().toUpperCase());
 
-                if ("admin".equalsIgnoreCase(user.getRole())) {
+                if ("ADMIN".equalsIgnoreCase(user.getRole())) {
                     AdminTaskController adminTaskController = new AdminTaskController();
                     adminTaskController.handleAdminTasks(objectInputStream, objectOutputStream);
-                } else if ("chef".equalsIgnoreCase(user.getRole())) {
+                } else if ("CHEF".equalsIgnoreCase(user.getRole())) {
                     ChefTaskController chefTaskController = new ChefTaskController();
                     chefTaskController.handleChefTasks(objectInputStream, objectOutputStream);
-                } else if ("employee".equalsIgnoreCase(user.getRole())) {
+                } else if ("EMPLOYEE".equalsIgnoreCase(user.getRole())) {
                     EmployeeTaskController employeeTaskController = new EmployeeTaskController();
                     employeeTaskController.handleEmployeeTasks(objectInputStream, objectOutputStream);
                 }
@@ -53,7 +52,6 @@ public class LoginController extends Thread {
             }
 
         } catch (IOException | ClassNotFoundException | DatabaseException e) {
-            e.printStackTrace();
             try (ObjectOutputStream objectOutputStream = new ObjectOutputStream(socket.getOutputStream())) {
                 objectOutputStream.writeObject("An error occurred while processing your request. Please try again.");
             } catch (IOException ioException) {

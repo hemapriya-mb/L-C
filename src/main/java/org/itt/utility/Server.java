@@ -35,6 +35,7 @@ public class Server {
 
             while (true) {
                 Socket socket = serverSocket.accept();
+                System.out.println("Client connected: " + socket.getInetAddress().getHostAddress());
                 new LoginController(socket).start();
             }
         } catch (IOException e) {

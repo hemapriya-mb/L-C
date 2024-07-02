@@ -38,7 +38,7 @@ public class ChefService {
             List<Item> items = itemRepository.getTopRatedItems();
             StringBuilder result = new StringBuilder();
             result.append(String.format("%-10s %-20s %-10s %-20s %-15s %-50s %-15s%n", "Item ID", "Item Name", "Price", "Availability", "Meal Type", "Description", "Average Rating"));
-            result.append("=========================================================================================================================\n");
+            result.append("============================================================================================================================================================\n");
             for (Item item : items) {
                 result.append(String.format("%-10d %-20s %-10.2f %-20s %-15s %-50s %-15.2f%n",
                         item.getItemId(),
