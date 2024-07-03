@@ -47,7 +47,6 @@ public class LoginControllerClient {
                     }
 
                 } catch (IOException | ClassNotFoundException e) {
-                    e.printStackTrace();
                     System.out.println("An error occurred while processing your request. Please try again.");
                     break;
                 }

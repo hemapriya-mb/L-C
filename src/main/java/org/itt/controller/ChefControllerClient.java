@@ -1,6 +1,5 @@
 package org.itt.controller;
 
-
 import org.itt.constant.ChefAction;
 
 import java.io.BufferedReader;
@@ -45,6 +44,15 @@ public class ChefControllerClient {
                         handleSelectItemsForNextDay(bufferedReader);
                         handleResponse();
                         break;
+                    case VIEW_DISCARD_MENU:
+                        handleResponse();
+                        break;
+                    case REMOVE_FOOD_ITEM:
+                        handleRemoveFoodItem(bufferedReader);
+                        handleResponse();
+                        break;
+                    case GET_DETAILED_FEEDBACK:
+                        break;
                     case EXIT:
                         System.out.println("Exiting...");
                         return;
@@ -54,7 +62,6 @@ public class ChefControllerClient {
                 }
             }
         } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
             System.out.println("An error occurred while processing your request. Please try again.");
         }
     }
@@ -69,4 +76,11 @@ public class ChefControllerClient {
         String input = bufferedReader.readLine();
         objectOutputStream.writeObject(input);
     }
+
+    private void handleRemoveFoodItem(BufferedReader bufferedReader) throws IOException {
+        System.out.println("Enter the id of the food item to remove: ");
+        String itemName = bufferedReader.readLine();
+        objectOutputStream.writeObject(itemName);
+    }
+
 }
