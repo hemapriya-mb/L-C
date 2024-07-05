@@ -37,21 +37,20 @@ public class ChefControllerClient {
                 }
 
                 switch (choice) {
-                    case VIEW_HIGH_RATED_ITEMS:
+                    case VIEW_HIGH_RATED_ITEMS, VIEW_DISCARD_MENU:
                         handleResponse();
                         break;
                     case SELECT_ITEMS_FOR_NEXT_DAY:
                         handleSelectItemsForNextDay(bufferedReader);
                         handleResponse();
                         break;
-                    case VIEW_DISCARD_MENU:
-                        handleResponse();
-                        break;
                     case REMOVE_FOOD_ITEM:
                         handleRemoveFoodItem(bufferedReader);
                         handleResponse();
                         break;
-                    case GET_DETAILED_FEEDBACK:
+                    case ADD_ITEM_FOR_DETAILED_FEEDBACK:
+                        handleAddItemForDetailedFeedback(bufferedReader);
+                        handleResponse();
                         break;
                     case EXIT:
                         System.out.println("Exiting...");
@@ -83,4 +82,9 @@ public class ChefControllerClient {
         objectOutputStream.writeObject(itemName);
     }
 
+    private void handleAddItemForDetailedFeedback(BufferedReader bufferedReader) throws IOException {
+        System.out.println("Enter the id of the item to mark for detailed feedback: ");
+        String itemId = bufferedReader.readLine();
+        objectOutputStream.writeObject(itemId);
+    }
 }

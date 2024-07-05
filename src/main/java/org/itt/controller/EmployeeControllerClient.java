@@ -25,7 +25,7 @@ public class EmployeeControllerClient {
                 String menu = (String) objectInputStream.readObject();
                 System.out.println(menu);
 
-                int userChoice = Integer.parseInt(bufferedReader.readLine());
+                int userChoice = Integer.parseInt(bufferedReader.readLine().trim());
                 objectOutputStream.writeObject(userChoice);
                 objectOutputStream.writeObject(userId);
 
@@ -52,6 +52,9 @@ public class EmployeeControllerClient {
                     case GIVE_FEEDBACK:
                         handleGiveFeedback(bufferedReader);
                         break;
+                    case GIVE_DETAILED_FEEDBACK:
+                        handleGiveDetailedFeedback(bufferedReader);
+                        break;
                     case EXIT:
                         System.out.println("Exiting...");
                         return;
@@ -70,7 +73,7 @@ public class EmployeeControllerClient {
         handleResponse();
 
         System.out.print("Enter the item ID to order: ");
-        int itemId = Integer.parseInt(bufferedReader.readLine());
+        int itemId = Integer.parseInt(bufferedReader.readLine().trim());
         objectOutputStream.writeObject(itemId);
 
         handleResponse();
@@ -80,7 +83,7 @@ public class EmployeeControllerClient {
         handleResponse();
 
         System.out.print("Enter the item ID to poll for: ");
-        int itemId = Integer.parseInt(bufferedReader.readLine());
+        int itemId = Integer.parseInt(bufferedReader.readLine().trim());
         objectOutputStream.writeObject(itemId);
 
         handleResponse();
@@ -88,20 +91,48 @@ public class EmployeeControllerClient {
 
     private void handleGiveFeedback(BufferedReader bufferedReader) throws IOException, ClassNotFoundException {
         System.out.print("Enter the order ID: ");
-        int orderId = Integer.parseInt(bufferedReader.readLine());
+        int orderId = Integer.parseInt(bufferedReader.readLine().trim());
         objectOutputStream.writeObject(orderId);
 
         System.out.print("Enter the item ID: ");
-        int itemId = Integer.parseInt(bufferedReader.readLine());
+        int itemId = Integer.parseInt(bufferedReader.readLine().trim());
         objectOutputStream.writeObject(itemId);
 
         System.out.print("Enter the rating (1-5): ");
-        int rating = Integer.parseInt(bufferedReader.readLine());
+        int rating = Integer.parseInt(bufferedReader.readLine().trim());
         objectOutputStream.writeObject(rating);
 
         System.out.print("Enter your comments: ");
         String comment = bufferedReader.readLine();
         objectOutputStream.writeObject(comment);
+
+        handleResponse();
+    }
+
+    private void handleGiveDetailedFeedback(BufferedReader bufferedReader) throws IOException, ClassNotFoundException {
+        System.out.println("Fetching items eligible for detailed feedback...");
+        objectOutputStream.writeObject("FETCH_DETAILED_FEEDBACK_ITEMS");
+
+        handleResponse();
+
+        System.out.print("Enter the item ID for detailed feedback: ");
+        int itemId = Integer.parseInt(bufferedReader.readLine());
+        objectOutputStream.writeObject(itemId);
+
+        String question1 = (String) objectInputStream.readObject();
+        System.out.println(question1);
+        String answer1 = bufferedReader.readLine();
+        objectOutputStream.writeObject(answer1);
+
+        String question2 = (String) objectInputStream.readObject();
+        System.out.println(question2);
+        String answer2 = bufferedReader.readLine();
+        objectOutputStream.writeObject(answer2);
+
+        String question3 = (String) objectInputStream.readObject();
+        System.out.println(question3);
+        String answer3 = bufferedReader.readLine();
+        objectOutputStream.writeObject(answer3);
 
         handleResponse();
     }
