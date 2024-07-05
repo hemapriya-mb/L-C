@@ -5,7 +5,7 @@ public enum ChefAction {
     SELECT_ITEMS_FOR_NEXT_DAY("Select Items for Next Day"),
     VIEW_DISCARD_MENU("View Discard Menu"),
     REMOVE_FOOD_ITEM("Remove Food Item"),
-    GET_DETAILED_FEEDBACK("Get Detailed Feedback"),
+    ADD_ITEM_FOR_DETAILED_FEEDBACK("Add Item for Detailed Feedback"),
     EXIT("Exit");
 
     private final String description;

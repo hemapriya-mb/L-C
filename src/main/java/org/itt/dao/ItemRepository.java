@@ -13,7 +13,7 @@ public class ItemRepository {
         List<Item> items = new ArrayList<>();
         String query = "SELECT * FROM item";
 
-        try (Connection connection = DataBaseConnector.getConnection();
+        try (Connection connection = DataBaseConnector.getInstance().getConnection();
              PreparedStatement statement = connection.prepareStatement(query);
              ResultSet resultSet = statement.executeQuery()) {
 
@@ -37,7 +37,7 @@ public class ItemRepository {
     public void addItem(Item item) throws DatabaseException {
         String query = "INSERT INTO item (item_name, price, availability_status, meal_type, description) VALUES (?, ?, ?, ?, ?)";
 
-        try (Connection connection = DataBaseConnector.getConnection();
+        try (Connection connection = DataBaseConnector.getInstance().getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, item.getItemName());
             statement.setDouble(2, item.getPrice());
@@ -53,7 +53,7 @@ public class ItemRepository {
     public boolean updateItem(Item item) throws DatabaseException {
         String query = "UPDATE item SET item_name = ?, price = ?, availability_status = ?, meal_type = ?, description = ? WHERE item_id = ?";
 
-        try (Connection connection = DataBaseConnector.getConnection();
+        try (Connection connection = DataBaseConnector.getInstance().getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, item.getItemName());
             statement.setDouble(2, item.getPrice());
@@ -71,7 +71,7 @@ public class ItemRepository {
     public boolean checkItemPresent(int itemId) throws DatabaseException {
         String query = "SELECT 1 FROM item WHERE item_id = ?";
 
-        try (Connection connection = DataBaseConnector.getConnection();
+        try (Connection connection = DataBaseConnector.getInstance().getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setInt(1, itemId);
             try (ResultSet resultSet = statement.executeQuery()) {
@@ -85,7 +85,7 @@ public class ItemRepository {
     public boolean deleteItem(int itemId) throws DatabaseException {
         String query = "DELETE FROM item WHERE item_id = ?";
 
-        try (Connection connection = DataBaseConnector.getConnection();
+        try (Connection connection = DataBaseConnector.getInstance().getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setInt(1, itemId);
             int rowsAffected = statement.executeUpdate();
@@ -106,7 +106,7 @@ public class ItemRepository {
                 "ORDER BY avg_rating DESC " +
                 "LIMIT 10";
 
-        try (Connection connection = DataBaseConnector.getConnection();
+        try (Connection connection = DataBaseConnector.getInstance().getConnection();
              PreparedStatement statement = connection.prepareStatement(query);
              ResultSet resultSet = statement.executeQuery()) {
 
@@ -132,7 +132,7 @@ public class ItemRepository {
         String query = "SELECT * FROM item WHERE item_id = ?";
         Item item = null;
 
-        try (Connection connection = DataBaseConnector.getConnection();
+        try (Connection connection = DataBaseConnector.getInstance().getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setInt(1, itemId);
 
@@ -154,4 +154,36 @@ public class ItemRepository {
         return item;
     }
 
+    public void markItemForDetailedFeedback(int itemId) throws DatabaseException {
+        String sql = "UPDATE item SET is_for_detailed_feedback = TRUE WHERE item_id = ?";
+        try (Connection connection = DataBaseConnector.getInstance().getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setInt(1, itemId);
+            int rowsAffected = preparedStatement.executeUpdate();
+            if (rowsAffected == 0) {
+                throw new DatabaseException("No item found with ID: " + itemId);
+            }
+        } catch (SQLException e) {
+            throw new DatabaseException("Error marking item for detailed feedback: " + e.getMessage());
+        }
+    }
+
+    public List<String> getItemsForDetailedFeedback() {
+        List<String> items = new ArrayList<>();
+        String query = "SELECT item_name FROM item WHERE is_for_detailed_feedback = true";
+
+        try (Connection connection =DataBaseConnector.getInstance().getConnection();
+             PreparedStatement statement = connection.prepareStatement(query);
+             ResultSet resultSet = statement.executeQuery()) {
+
+            while (resultSet.next()) {
+                items.add(resultSet.getString("item_name"));
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return items;
+    }
 }

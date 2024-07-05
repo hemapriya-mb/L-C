@@ -12,7 +12,7 @@ public class PollRepository {
     public void addPoll(Poll poll) throws DatabaseException {
         String query = "INSERT INTO poll (user_id, item_id, poll_date) VALUES (?, ?, ?)";
 
-        try (Connection connection = DataBaseConnector.getConnection();
+        try (Connection connection = DataBaseConnector.getInstance().getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setInt(1, poll.getUserId());
             statement.setInt(2, poll.getItemId());
@@ -26,7 +26,7 @@ public class PollRepository {
     public boolean hasPolledForItem(int userId, int itemId) throws DatabaseException {
         String query = "SELECT COUNT(*) FROM poll WHERE user_id = ? AND item_id = ?";
 
-        try (Connection connection = DataBaseConnector.getConnection();
+        try (Connection connection = DataBaseConnector.getInstance().getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setInt(1, userId);
             statement.setInt(2, itemId);
@@ -47,7 +47,7 @@ public class PollRepository {
         List<Integer> itemIds = new ArrayList<>();
         String query = "SELECT item_id FROM next_day_item";
 
-        try (Connection connection = DataBaseConnector.getConnection();
+        try (Connection connection = DataBaseConnector.getInstance().getConnection();
              PreparedStatement statement = connection.prepareStatement(query);
              ResultSet resultSet = statement.executeQuery()) {
 
@@ -64,7 +64,7 @@ public class PollRepository {
     public void incrementPollCount(int itemId) throws DatabaseException {
         String query = "UPDATE next_day_item SET poll_count = poll_count + 1 WHERE item_id = ?";
 
-        try (Connection connection = DataBaseConnector.getConnection();
+        try (Connection connection = DataBaseConnector.getInstance().getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setInt(1, itemId);
             statement.executeUpdate();

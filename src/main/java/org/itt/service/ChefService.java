@@ -138,4 +138,13 @@ public class ChefService {
             return e.getMessage();
         }
     }
+
+    public String addItemForDetailedFeedback(int itemId) {
+        try {
+            itemRepository.markItemForDetailedFeedback(itemId);
+            return "Item marked for detailed feedback successfully.";
+        } catch (DatabaseException e) {
+            return "An error occurred while marking item for detailed feedback: " + e.getMessage();
+        }
+    }
 }

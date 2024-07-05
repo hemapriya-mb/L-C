@@ -29,6 +29,11 @@ public class EmployeeTaskController {
                     objectOutputStream.writeObject("Invalid choice. Please try again.");
                     continue;
                 }
+                if ("FETCH_DETAILED_FEEDBACK_ITEMS".equals(choiceValue)) {
+                    String response = employeeService.getItemsForDetailedFeedback();
+                    objectOutputStream.writeObject(response);
+                    continue;
+                }
 
                 String response;
                 switch (choice) {
@@ -55,6 +60,9 @@ public class EmployeeTaskController {
                         break;
                     case GET_RECOMMENDATIONS:
                         response = employeeService.getRecommendations();
+                        break;
+                    case GIVE_DETAILED_FEEDBACK:
+                        response = handleGiveDetailedFeedback(objectInputStream, objectOutputStream, userId);
                         break;
                     case EXIT:
                         response = "Exiting...";
@@ -83,5 +91,24 @@ public class EmployeeTaskController {
         int rating = (int) objectInputStream.readObject();
         String comment = (String) objectInputStream.readObject();
         return employeeService.giveFeedback(userId, orderId, itemId, rating, comment);
+    }
+
+    private String handleGiveDetailedFeedback(ObjectInputStream objectInputStream, ObjectOutputStream objectOutputStream, int userId) throws IOException, ClassNotFoundException {
+        int itemId = (int) objectInputStream.readObject();
+
+        String question1 = "Q1. What didn't you like about this item?";
+        String question2 = "Q2. How would you like this item to taste?";
+        String question3 = "Q3. Share your mom's recipe.";
+
+        objectOutputStream.writeObject(question1);
+        String answer1 = (String) objectInputStream.readObject();
+
+        objectOutputStream.writeObject(question2);
+        String answer2 = (String) objectInputStream.readObject();
+
+        objectOutputStream.writeObject(question3);
+        String answer3 = (String) objectInputStream.readObject();
+
+        return employeeService.giveDetailedFeedback(userId, itemId, answer1, answer2, answer3);
     }
 }

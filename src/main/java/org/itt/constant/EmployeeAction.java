@@ -7,6 +7,7 @@ public enum EmployeeAction {
     GIVE_FEEDBACK("Give Feedback"),
     POLL_FOR_NEXT_DAY_ITEMS("Poll for Next Day Items"),
     GET_RECOMMENDATIONS("Get Recommendations"),
+    GIVE_DETAILED_FEEDBACK("Give detailed feedback"),
     EXIT("Exit");
 
     private final String description;

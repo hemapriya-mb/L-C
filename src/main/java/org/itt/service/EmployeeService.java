@@ -16,6 +16,7 @@ public class EmployeeService {
     private final NotificationRepository notificationRepository;
     private final FeedbackRepository feedbackRepository;
     private final PollRepository pollRepository;
+    private final DetailedFeedbackRepository detailedFeedbackRepository;
 
     public EmployeeService() {
         itemRepository = new ItemRepository();
@@ -23,6 +24,7 @@ public class EmployeeService {
         notificationRepository = new NotificationRepository();
         feedbackRepository = new FeedbackRepository();
         pollRepository = new PollRepository();
+        detailedFeedbackRepository = new DetailedFeedbackRepository();
     }
 
     public String getEmployeeMenu() {
@@ -238,5 +240,27 @@ public class EmployeeService {
         }
 
         return recommendations.toString();
+    }
+
+    public String giveDetailedFeedback(int userId, int itemId, String answer1, String answer2, String answer3) {
+        try {
+            DetailedFeedback detailedFeedback = new DetailedFeedback(userId, itemId, answer1, answer2, answer3);
+            detailedFeedbackRepository.addDetailedFeedback(detailedFeedback);
+            return "Detailed feedback submitted successfully.";
+        } catch (DatabaseException e) {
+            return "An error occurred while submitting detailed feedback: " + e.getMessage();
+        }
+    }
+
+    public String getItemsForDetailedFeedback() {
+        List<String> items = itemRepository.getItemsForDetailedFeedback();
+        if (items.isEmpty()) {
+            return "No items available for detailed feedback.";
+        }
+        StringBuilder response = new StringBuilder("Items available for detailed feedback:\n");
+        for (String item : items) {
+            response.append(item).append("\n");
+        }
+        return response.toString();
     }
 }

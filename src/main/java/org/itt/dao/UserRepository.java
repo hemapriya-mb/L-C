@@ -13,7 +13,7 @@ public class UserRepository {
         User user = null;
         String query = "SELECT * FROM user WHERE user_id = ? AND password = ?";
 
-        try (Connection connection = DataBaseConnector.getConnection();
+        try (Connection connection = DataBaseConnector.getInstance().getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setInt(1, userId);
             statement.setString(2, password);
@@ -35,7 +35,7 @@ public class UserRepository {
     public void addUser(User user) throws DatabaseException {
         String query = "INSERT INTO user (name, role, password) VALUES (?, ?, ?)";
 
-        try (Connection connection = DataBaseConnector.getConnection();
+        try (Connection connection = DataBaseConnector.getInstance().getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, user.getName());
             statement.setString(2, user.getRole());
@@ -50,7 +50,7 @@ public class UserRepository {
         List<Integer> userIds = new ArrayList<>();
         String query = "SELECT user_id FROM user WHERE role = 'Employee'";
 
-        try (Connection connection = DataBaseConnector.getConnection();
+        try (Connection connection = DataBaseConnector.getInstance().getConnection();
              PreparedStatement statement = connection.prepareStatement(query);
              ResultSet resultSet = statement.executeQuery()) {
 

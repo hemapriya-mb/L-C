@@ -43,6 +43,9 @@ public class ChefTaskController {
                     case REMOVE_FOOD_ITEM:
                         response = removeFoodItem(objectInputStream);
                         break;
+                    case ADD_ITEM_FOR_DETAILED_FEEDBACK:
+                        response = addItemForDetailedFeedback(objectInputStream);
+                        break;
                     case EXIT:
                         response = "Exiting...";
                         objectOutputStream.writeObject(response);
@@ -74,4 +77,9 @@ public class ChefTaskController {
         return chefService.removeFoodItem(itemId);
     }
 
+    private String addItemForDetailedFeedback(ObjectInputStream objectInputStream) throws IOException, ClassNotFoundException {
+        String itemIdString = (String) objectInputStream.readObject();
+        int itemId = Integer.parseInt(itemIdString);
+        return chefService.addItemForDetailedFeedback(itemId);
+    }
 }
