@@ -9,9 +9,14 @@ public class Item implements Serializable {
     private String availabilityStatus;
     private String mealType;
     private String description;
-    private double averageRating;
+    private String foodType;
+    private String spiceLevel;
+    private String cuisineType;
+    private Boolean sweet;
+
     public Item() {
     }
+
     public int getItemId() {
         return itemId;
     }
@@ -60,13 +65,35 @@ public class Item implements Serializable {
         this.description = description;
     }
 
-
-    public double getAverageRating() {
-        return averageRating;
+    public String getFoodType() {
+        return foodType;
     }
 
-    public void setAverageRating(double averageRating) {
-        this.averageRating = averageRating;
+    public void setFoodType(String foodType) {
+        this.foodType = foodType;
     }
 
+    public String getSpiceLevel() {
+        return spiceLevel;
+    }
+
+    public void setSpiceLevel(String spiceLevel) {
+        this.spiceLevel = spiceLevel;
+    }
+
+    public String getCuisineType() {
+        return cuisineType;
+    }
+
+    public void setCuisineType(String cuisineType) {
+        this.cuisineType = cuisineType;
+    }
+
+    public Boolean getSweet() {
+        return sweet;
+    }
+
+    public void setSweet(Boolean sweet) {
+        this.sweet = sweet;
+    }
 }

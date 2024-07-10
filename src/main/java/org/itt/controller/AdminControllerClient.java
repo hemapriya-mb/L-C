@@ -3,7 +3,6 @@ package org.itt.controller;
 import org.itt.constant.AdminAction;
 import org.itt.entity.Item;
 import org.itt.exception.InvalidInputException;
-import org.itt.service.ItemService;
 import org.itt.service.UserService;
 
 import java.io.BufferedReader;
@@ -17,13 +16,11 @@ public class AdminControllerClient {
     private final ObjectInputStream objectInputStream;
     private final ObjectOutputStream objectOutputStream;
     private final UserService userService;
-    private final ItemService itemService;
 
     public AdminControllerClient(ObjectInputStream objectInputStream, ObjectOutputStream objectOutputStream) {
         this.objectInputStream = objectInputStream;
         this.objectOutputStream = objectOutputStream;
         this.userService = new UserService();
-        this.itemService = new ItemService();
     }
 
     public void handleAdminTasks() {
@@ -89,16 +86,38 @@ public class AdminControllerClient {
     }
 
     private void handleAddMenuItem() throws IOException {
-        try {
-            Item item = itemService.getItemDetails();
-            objectOutputStream.writeObject(item.getItemName());
-            objectOutputStream.writeObject(item.getPrice());
-            objectOutputStream.writeObject(item.getAvailabilityStatus());
-            objectOutputStream.writeObject(item.getMealType());
-            objectOutputStream.writeObject(item.getDescription());
-        } catch (InvalidInputException e) {
-            System.out.println(e.getMessage());
-        }
+        Item item = new Item();
+
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+
+        System.out.print("Enter item name: ");
+        item.setItemName(bufferedReader.readLine());
+
+        System.out.print("Enter price: ");
+        item.setPrice(Double.parseDouble(bufferedReader.readLine()));
+
+        System.out.print("Enter availability status: ");
+        item.setAvailabilityStatus(bufferedReader.readLine());
+
+        System.out.print("Enter meal type(breakfast,lunch,dinner): ");
+        item.setMealType(bufferedReader.readLine());
+
+        System.out.print("Enter description: ");
+        item.setDescription(bufferedReader.readLine());
+
+        System.out.print("Enter food type( Vegetarian,Non Vegetarian,Eggetarian): ");
+        item.setFoodType(bufferedReader.readLine());
+
+        System.out.print("Enter spice level(high,medium,low): ");
+        item.setSpiceLevel(bufferedReader.readLine());
+
+        System.out.print("Enter cuisine type(north indian, south indian, other): ");
+        item.setCuisineType(bufferedReader.readLine());
+
+        System.out.print("Is it sweet? (true/false): ");
+        item.setSweet(Boolean.parseBoolean(bufferedReader.readLine()));
+
+        objectOutputStream.writeObject(item);
     }
 
     private void handleUpdateMenuItem(BufferedReader bufferedReader) throws IOException {

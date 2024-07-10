@@ -55,6 +55,9 @@ public class EmployeeControllerClient {
                     case GIVE_DETAILED_FEEDBACK:
                         handleGiveDetailedFeedback(bufferedReader);
                         break;
+                    case UPDATE_PROFILE:
+                        handleUpdateProfile(bufferedReader);
+                        break;
                     case EXIT:
                         System.out.println("Exiting...");
                         return;
@@ -64,7 +67,6 @@ public class EmployeeControllerClient {
                 }
             }
         } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
             System.out.println("An error occurred while processing your request. Please try again.");
         }
     }
@@ -113,7 +115,8 @@ public class EmployeeControllerClient {
         System.out.println("Fetching items eligible for detailed feedback...");
         objectOutputStream.writeObject("FETCH_DETAILED_FEEDBACK_ITEMS");
 
-        handleResponse();
+        String response = (String) objectInputStream.readObject();
+        System.out.println(response);
 
         System.out.print("Enter the item ID for detailed feedback: ");
         int itemId = Integer.parseInt(bufferedReader.readLine());
@@ -133,6 +136,28 @@ public class EmployeeControllerClient {
         System.out.println(question3);
         String answer3 = bufferedReader.readLine();
         objectOutputStream.writeObject(answer3);
+
+        handleResponse();
+    }
+
+    private void handleUpdateProfile(BufferedReader bufferedReader) throws IOException, ClassNotFoundException {
+        System.out.println("Please answer these questions to know your preferences");
+
+        System.out.println("1) Please select one - \n1. Vegetarian\n2. Non Vegetarian\n3. Eggetarian");
+        int foodTypeChoice = Integer.parseInt(bufferedReader.readLine().trim());
+        objectOutputStream.writeObject(foodTypeChoice);
+
+        System.out.println("2) Please select your spice level - \n1. High\n2. Medium\n3. Low");
+        int spiceLevelChoice = Integer.parseInt(bufferedReader.readLine().trim());
+        objectOutputStream.writeObject(spiceLevelChoice);
+
+        System.out.println("3) What do you prefer most? - \n1. North Indian\n2. South Indian\n3. Other");
+        int cuisineChoice = Integer.parseInt(bufferedReader.readLine().trim());
+        objectOutputStream.writeObject(cuisineChoice);
+
+        System.out.println("4) Do you have a sweet tooth? - \n1. Yes\n2. No");
+        int sweetToothChoice = Integer.parseInt(bufferedReader.readLine().trim());
+        objectOutputStream.writeObject(sweetToothChoice);
 
         handleResponse();
     }
