@@ -1,6 +1,7 @@
 package org.itt.controller;
 
 import org.itt.constant.AdminAction;
+import org.itt.entity.Item;
 import org.itt.service.AdminService;
 
 import java.io.IOException;
@@ -73,25 +74,36 @@ public class AdminTaskController {
     }
 
     private String addMenuItem(ObjectInputStream objectInputStream) throws IOException, ClassNotFoundException {
-        String itemName = (String) objectInputStream.readObject();
-        double price = (Double) objectInputStream.readObject();
-        String availabilityStatus = (String) objectInputStream.readObject();
-        String mealType = (String) objectInputStream.readObject();
-        String description = (String) objectInputStream.readObject();
+        Item newItem = new Item();
+        newItem.setItemName((String) objectInputStream.readObject());
+        newItem.setPrice((Double) objectInputStream.readObject());
+        newItem.setAvailabilityStatus((String) objectInputStream.readObject());
+        newItem.setMealType((String) objectInputStream.readObject());
+        newItem.setDescription((String) objectInputStream.readObject());
+        newItem.setFoodType((String) objectInputStream.readObject());
+        newItem.setSpiceLevel((String) objectInputStream.readObject());
+        newItem.setCuisineType((String) objectInputStream.readObject());
+        newItem.setSweet((Boolean) objectInputStream.readObject());
 
-        return adminService.addMenuItem(itemName, price, availabilityStatus, mealType, description);
+        return adminService.addMenuItem(newItem);
     }
 
     private String updateMenuItem(ObjectInputStream objectInputStream) throws IOException, ClassNotFoundException {
-        int itemId = (Integer) objectInputStream.readObject();
-        String itemName = (String) objectInputStream.readObject();
-        double price = (Double) objectInputStream.readObject();
-        String availabilityStatus = (String) objectInputStream.readObject();
-        String mealType = (String) objectInputStream.readObject();
-        String description = (String) objectInputStream.readObject();
+        Item updatedItem = new Item();
+        updatedItem.setItemId((Integer) objectInputStream.readObject());
+        updatedItem.setItemName((String) objectInputStream.readObject());
+        updatedItem.setPrice((Double) objectInputStream.readObject());
+        updatedItem.setAvailabilityStatus((String) objectInputStream.readObject());
+        updatedItem.setMealType((String) objectInputStream.readObject());
+        updatedItem.setDescription((String) objectInputStream.readObject());
+        updatedItem.setFoodType((String) objectInputStream.readObject());
+        updatedItem.setSpiceLevel((String) objectInputStream.readObject());
+        updatedItem.setCuisineType((String) objectInputStream.readObject());
+        updatedItem.setSweet((Boolean) objectInputStream.readObject());
 
-        return adminService.updateMenuItem(itemId, itemName, price, availabilityStatus, mealType, description);
+        return adminService.updateMenuItem(updatedItem);
     }
+
 
     private String deleteMenuItem(ObjectInputStream objectInputStream) throws IOException, ClassNotFoundException {
         int itemId = (Integer) objectInputStream.readObject();

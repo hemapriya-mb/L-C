@@ -35,7 +35,7 @@ public class ItemRepository {
     }
 
     public void addItem(Item item) throws DatabaseException {
-        String query = "INSERT INTO item (item_name, price, availability_status, meal_type, description) VALUES (?, ?, ?, ?, ?)";
+        String query = "INSERT INTO item (item_name, price, availability_status, meal_type, description, food_type, spice_level, cuisine_type, sweet) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection connection = DataBaseConnector.getInstance().getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
@@ -44,6 +44,10 @@ public class ItemRepository {
             statement.setString(3, item.getAvailabilityStatus());
             statement.setString(4, item.getMealType());
             statement.setString(5, item.getDescription());
+            statement.setString(6, item.getFoodType());
+            statement.setString(7, item.getSpiceLevel());
+            statement.setString(8, item.getCuisineType());
+            statement.setBoolean(9, item.getSweet());
             statement.executeUpdate();
         } catch (SQLException e) {
             throw new DatabaseException("Failed to add item", e);
@@ -51,7 +55,7 @@ public class ItemRepository {
     }
 
     public boolean updateItem(Item item) throws DatabaseException {
-        String query = "UPDATE item SET item_name = ?, price = ?, availability_status = ?, meal_type = ?, description = ? WHERE item_id = ?";
+        String query = "UPDATE item SET item_name = ?, price = ?, availability_status = ?, meal_type = ?, description = ?, food_type = ?, spice_level = ?, cuisine_type = ?, sweet = ? WHERE item_id = ?";
 
         try (Connection connection = DataBaseConnector.getInstance().getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
@@ -60,7 +64,11 @@ public class ItemRepository {
             statement.setString(3, item.getAvailabilityStatus());
             statement.setString(4, item.getMealType());
             statement.setString(5, item.getDescription());
-            statement.setInt(6, item.getItemId());
+            statement.setString(6, item.getFoodType());
+            statement.setString(7, item.getSpiceLevel());
+            statement.setString(8, item.getCuisineType());
+            statement.setBoolean(9, item.getSweet());
+            statement.setInt(10, item.getItemId());
             int rowsAffected = statement.executeUpdate();
             return rowsAffected > 0;
         } catch (SQLException e) {
@@ -168,22 +176,31 @@ public class ItemRepository {
         }
     }
 
-    public List<String> getItemsForDetailedFeedback() {
-        List<String> items = new ArrayList<>();
-        String query = "SELECT item_name FROM item WHERE is_for_detailed_feedback = true";
+    public List<Item> getItemsForDetailedFeedback() throws DatabaseException {
+        List<Item> items = new ArrayList<>();
+        String query = "SELECT item_id, item_name, price FROM item WHERE is_for_detailed_feedback = TRUE";
 
-        try (Connection connection =DataBaseConnector.getInstance().getConnection();
+        try (Connection connection = DataBaseConnector.getInstance().getConnection();
              PreparedStatement statement = connection.prepareStatement(query);
              ResultSet resultSet = statement.executeQuery()) {
 
             while (resultSet.next()) {
-                items.add(resultSet.getString("item_name"));
+                int itemId = resultSet.getInt("item_id");
+                String itemName = resultSet.getString("item_name");
+                double price = resultSet.getDouble("price");
+
+                Item item = new Item();
+                item.setItemId(itemId);
+                item.setItemName(itemName);
+                item.setPrice(price);
+                items.add(item);
             }
 
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (SQLException e) {
+            throw new DatabaseException("Error retrieving items for detailed feedback: " + e.getMessage(), e);
         }
 
         return items;
     }
+
 }

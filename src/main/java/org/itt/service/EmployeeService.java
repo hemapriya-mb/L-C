@@ -252,15 +252,24 @@ public class EmployeeService {
         }
     }
 
-    public String getItemsForDetailedFeedback() {
-        List<String> items = itemRepository.getItemsForDetailedFeedback();
+    public String getItemsForDetailedFeedback() throws DatabaseException {
+        List<Item> items = itemRepository.  getItemsForDetailedFeedback();
         if (items.isEmpty()) {
             return "No items available for detailed feedback.";
         }
         StringBuilder response = new StringBuilder("Items available for detailed feedback:\n");
-        for (String item : items) {
-            response.append(item).append("\n");
+        for (Item item : items) {
+            response.append("Item ID: ").append(item.getItemId())
+                    .append(", Name: ").append(item.getItemName())
+                    .append(", Price: ").append(item.getPrice())
+                    .append("\n");
         }
         return response.toString();
+    }
+
+    public String updateProfile(int userId, int foodTypeChoice, int spiceLevelChoice, int cuisineChoice, int sweetToothChoice) throws DatabaseException {
+        ProfileRepository profileRepository = new ProfileRepository();
+        profileRepository.saveProfile(userId, foodTypeChoice, spiceLevelChoice, cuisineChoice, sweetToothChoice);
+        return "Profile updated successfully.";
     }
 }

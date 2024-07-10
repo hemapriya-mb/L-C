@@ -1,6 +1,7 @@
 package org.itt.controller;
 
 import org.itt.constant.EmployeeAction;
+import org.itt.exception.DatabaseException;
 import org.itt.service.EmployeeService;
 
 import java.io.IOException;
@@ -14,7 +15,7 @@ public class EmployeeTaskController {
         this.employeeService = new EmployeeService();
     }
 
-    public void handleEmployeeTasks(ObjectInputStream objectInputStream, ObjectOutputStream objectOutputStream) {
+    public void handleEmployeeTasks(ObjectInputStream objectInputStream, ObjectOutputStream objectOutputStream) throws IOException {
         try {
             while (true) {
                 String menu = employeeService.getEmployeeMenu();
@@ -27,11 +28,6 @@ public class EmployeeTaskController {
                     choice = EmployeeAction.fromValue(choiceValue);
                 } catch (IllegalArgumentException e) {
                     objectOutputStream.writeObject("Invalid choice. Please try again.");
-                    continue;
-                }
-                if ("FETCH_DETAILED_FEEDBACK_ITEMS".equals(choiceValue)) {
-                    String response = employeeService.getItemsForDetailedFeedback();
-                    objectOutputStream.writeObject(response);
                     continue;
                 }
 
@@ -64,6 +60,9 @@ public class EmployeeTaskController {
                     case GIVE_DETAILED_FEEDBACK:
                         response = handleGiveDetailedFeedback(objectInputStream, objectOutputStream, userId);
                         break;
+                    case UPDATE_PROFILE:
+                        response = handleUpdateProfile(objectInputStream, userId);
+                        break;
                     case EXIT:
                         response = "Exiting...";
                         objectOutputStream.writeObject(response);
@@ -75,13 +74,8 @@ public class EmployeeTaskController {
 
                 objectOutputStream.writeObject(response);
             }
-        } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
-            try {
-                objectOutputStream.writeObject("An error occurred while processing your request. Please try again.");
-            } catch (IOException ioException) {
-                ioException.printStackTrace();
-            }
+        } catch (IOException | ClassNotFoundException | DatabaseException e) {
+            objectOutputStream.writeObject("An error occurred while processing your request. Please try again.");
         }
     }
 
@@ -93,7 +87,13 @@ public class EmployeeTaskController {
         return employeeService.giveFeedback(userId, orderId, itemId, rating, comment);
     }
 
-    private String handleGiveDetailedFeedback(ObjectInputStream objectInputStream, ObjectOutputStream objectOutputStream, int userId) throws IOException, ClassNotFoundException {
+
+    private String handleGiveDetailedFeedback(ObjectInputStream objectInputStream, ObjectOutputStream objectOutputStream, int userId) throws IOException, ClassNotFoundException, DatabaseException {
+        if ("FETCH_DETAILED_FEEDBACK_ITEMS".equals(objectInputStream.readObject())) {
+            String response = employeeService.getItemsForDetailedFeedback();
+            objectOutputStream.writeObject(response);
+        }
+
         int itemId = (int) objectInputStream.readObject();
 
         String question1 = "Q1. What didn't you like about this item?";
@@ -110,5 +110,14 @@ public class EmployeeTaskController {
         String answer3 = (String) objectInputStream.readObject();
 
         return employeeService.giveDetailedFeedback(userId, itemId, answer1, answer2, answer3);
+    }
+
+    private String handleUpdateProfile(ObjectInputStream objectInputStream, int userId) throws IOException, ClassNotFoundException, DatabaseException {
+        int foodTypeChoice = (int) objectInputStream.readObject();
+        int spiceLevelChoice = (int) objectInputStream.readObject();
+        int cuisineChoice = (int) objectInputStream.readObject();
+        int sweetToothChoice = (int) objectInputStream.readObject();
+
+        return employeeService.updateProfile(userId, foodTypeChoice, spiceLevelChoice, cuisineChoice, sweetToothChoice);
     }
 }

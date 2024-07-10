@@ -8,6 +8,7 @@ public enum EmployeeAction {
     POLL_FOR_NEXT_DAY_ITEMS("Poll for Next Day Items"),
     GET_RECOMMENDATIONS("Get Recommendations"),
     GIVE_DETAILED_FEEDBACK("Give detailed feedback"),
+    UPDATE_PROFILE("update profile"),
     EXIT("Exit");
 
     private final String description;
