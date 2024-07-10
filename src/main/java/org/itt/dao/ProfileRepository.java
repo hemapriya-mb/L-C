@@ -1,10 +1,12 @@
 package org.itt.dao;
 
+import org.itt.entity.Profile;
 import org.itt.exception.DatabaseException;
 import org.itt.utility.ProfileHelper;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class ProfileRepository {
@@ -31,5 +33,28 @@ public class ProfileRepository {
             throw new DatabaseException("Error saving profile data", e);
         }
     }
+    public Profile getProfileByUserId(int userId) throws DatabaseException {
+        String query = "SELECT * FROM employee_profile WHERE user_id = ?";
 
+        try (Connection connection = DataBaseConnector.getInstance().getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, userId);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    Profile profile = new Profile();
+                    profile.setUserId(resultSet.getInt("user_id"));
+                    profile.setFoodType(resultSet.getString("food_type"));
+                    profile.setSpiceLevel(resultSet.getString("spice_level"));
+                    profile.setCuisineType(resultSet.getString("cuisine_type"));
+                    profile.setSweet(resultSet.getBoolean("sweet"));
+                    return profile;
+                } else {
+                    throw new DatabaseException("Profile not found for user ID: " + userId);
+                }
+            }
+        } catch (SQLException e) {
+            throw new DatabaseException("Failed to fetch profile for user ID: " + userId, e);
+        }
+    }
 }
