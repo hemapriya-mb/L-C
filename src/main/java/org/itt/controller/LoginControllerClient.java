@@ -1,17 +1,17 @@
-package org.itt.utility;
+package org.itt.controller;
 
-import org.itt.entity.User;
-import org.itt.exception.InvalidInputException;
 import org.itt.service.UserService;
 
 import java.io.*;
 import java.net.Socket;
 
-public class Client {
+public class LoginControllerClient {
 
     private static Socket socket;
     private static ObjectOutputStream objectOutputStream;
     private static ObjectInputStream objectInputStream;
+    private static final String PORT_NUMBER =System.getenv("PORT_NUMBER");
+    private static final String HOST_NAME =System.getenv("HOST_NAME");
 
     public static void main(String[] args) {
         System.out.println("Welcome");
@@ -23,21 +23,22 @@ public class Client {
 
                 try {
                     UserService userService = new UserService();
-                    User user = userService.getUserCredentials();
-                    String responseMessage = login(user);
+                    int userId = userService.getUserId();
+                    String password = userService.getPassword();
+                    String responseMessage = login(userId, password);
                     System.out.println(responseMessage);
 
-                    if (responseMessage.startsWith("You have logged in as:")) {
+                    if (responseMessage.startsWith("Login successful:")) {
                         String role = responseMessage.split(":")[1];
-                        if (role.trim().equals("EMPLOYEE")) {
-                            EmployeeTaskClient employeeTaskClient = new EmployeeTaskClient(objectInputStream, objectOutputStream);
-                            employeeTaskClient.handleEmployeeTasks(user.getUserId());
-                        } else if (role.trim().equals("CHEF")) {
-                            ChefTaskClient chefTaskClient = new ChefTaskClient(objectInputStream, objectOutputStream);
-                            chefTaskClient.handleChefTasks();
-                        } else if (role.trim().equals("ADMIN")) {
-                            AdminTaskClient adminTaskClient = new AdminTaskClient(objectInputStream, objectOutputStream);
-                            adminTaskClient.handleAdminTasks();
+                        if ("EMPLOYEE".equals(role)) {
+                            EmployeeControllerClient employeeControllerClient = new EmployeeControllerClient(objectInputStream, objectOutputStream);
+                            employeeControllerClient.handleEmployeeTasks(userId);
+                        } else if ("CHEF".equals(role)) {
+                            ChefControllerClient chefControllerClient = new ChefControllerClient(objectInputStream, objectOutputStream);
+                            chefControllerClient.handleChefTasks();
+                        } else if ("ADMIN".equals(role)) {
+                            AdminControllerClient adminControllerClient = new AdminControllerClient(objectInputStream, objectOutputStream);
+                            adminControllerClient.handleAdminTasks();
                         }
                     }
 
@@ -47,10 +48,7 @@ public class Client {
                         continueLogin = false;
                     }
 
-                } catch (InvalidInputException exception) {
-                    System.out.println(exception.getMessage());
                 } catch (IOException | ClassNotFoundException e) {
-                    e.printStackTrace();
                     System.out.println("An error occurred while processing your request. Please try again.");
                     break;
                 }
@@ -63,14 +61,14 @@ public class Client {
         }
     }
 
-    private static String login(User user) throws IOException, ClassNotFoundException {
+    private static String login(int userId, String password) throws IOException, ClassNotFoundException {
         try {
-            socket = new Socket("localhost", 5000);
+            socket = new Socket(HOST_NAME, Integer.parseInt(PORT_NUMBER));
             objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
             objectInputStream = new ObjectInputStream(socket.getInputStream());
 
-            objectOutputStream.writeObject(String.valueOf(user.getUserId()));
-            objectOutputStream.writeObject(user.getPassword());
+            objectOutputStream.writeObject(userId);
+            objectOutputStream.writeObject(password);
 
             return (String) objectInputStream.readObject();
         } catch (IOException | ClassNotFoundException e) {
