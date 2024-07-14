@@ -1,12 +1,14 @@
 package org.itt.controller;
 
 import org.itt.constant.EmployeeAction;
+import org.itt.entity.Item;
 import org.itt.exception.DatabaseException;
 import org.itt.service.EmployeeService;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.List;
 
 public class EmployeeTaskController {
     private final EmployeeService employeeService;
@@ -63,6 +65,9 @@ public class EmployeeTaskController {
                     case UPDATE_PROFILE:
                         response = handleUpdateProfile(objectInputStream, userId);
                         break;
+                    case GET_RECOMMENDATION_BY_PROFILE:
+                        handleGetRecommendations(objectInputStream, objectOutputStream, userId);
+                        continue;  // avoid writing response as string
                     case EXIT:
                         response = "Exiting...";
                         objectOutputStream.writeObject(response);
@@ -86,7 +91,6 @@ public class EmployeeTaskController {
         String comment = (String) objectInputStream.readObject();
         return employeeService.giveFeedback(userId, orderId, itemId, rating, comment);
     }
-
 
     private String handleGiveDetailedFeedback(ObjectInputStream objectInputStream, ObjectOutputStream objectOutputStream, int userId) throws IOException, ClassNotFoundException, DatabaseException {
         if ("FETCH_DETAILED_FEEDBACK_ITEMS".equals(objectInputStream.readObject())) {
@@ -119,5 +123,14 @@ public class EmployeeTaskController {
         int sweetToothChoice = (int) objectInputStream.readObject();
 
         return employeeService.updateProfile(userId, foodTypeChoice, spiceLevelChoice, cuisineChoice, sweetToothChoice);
+    }
+
+    public void handleGetRecommendations(ObjectInputStream objectInputStream, ObjectOutputStream objectOutputStream, int userId) throws IOException {
+        try {
+            List<Item> recommendedItems = employeeService.getRecommendedItems(userId);
+            objectOutputStream.writeObject(recommendedItems);
+        } catch (DatabaseException | IOException e) {
+            objectOutputStream.writeObject("Failed to get recommendations: " + e.getMessage());
+        }
     }
 }

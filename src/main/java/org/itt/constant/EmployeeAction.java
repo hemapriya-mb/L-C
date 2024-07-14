@@ -9,6 +9,7 @@ public enum EmployeeAction {
     GET_RECOMMENDATIONS("Get Recommendations"),
     GIVE_DETAILED_FEEDBACK("Give detailed feedback"),
     UPDATE_PROFILE("update profile"),
+    GET_RECOMMENDATION_BY_PROFILE("get recommendation by profile"),
     EXIT("Exit");
 
     private final String description;

@@ -272,4 +272,8 @@ public class EmployeeService {
         profileRepository.saveProfile(userId, foodTypeChoice, spiceLevelChoice, cuisineChoice, sweetToothChoice);
         return "Profile updated successfully.";
     }
+    public List<Item> getRecommendedItems(int userId) throws DatabaseException {
+        RecommendationService recommendationService = new RecommendationService();
+        return recommendationService.recommendItems(userId);
+    }
 }
