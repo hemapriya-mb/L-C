@@ -1,12 +1,14 @@
 package org.itt.controller;
 
 import org.itt.constant.EmployeeAction;
+import org.itt.entity.Item;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.List;
 
 public class EmployeeControllerClient {
 
@@ -57,6 +59,9 @@ public class EmployeeControllerClient {
                         break;
                     case UPDATE_PROFILE:
                         handleUpdateProfile(bufferedReader);
+                        break;
+                    case GET_RECOMMENDATION_BY_PROFILE:
+                        handleGetRecommendations(userId);
                         break;
                     case EXIT:
                         System.out.println("Exiting...");
@@ -112,28 +117,22 @@ public class EmployeeControllerClient {
     }
 
     private void handleGiveDetailedFeedback(BufferedReader bufferedReader) throws IOException, ClassNotFoundException {
-        System.out.println("Fetching items eligible for detailed feedback...");
         objectOutputStream.writeObject("FETCH_DETAILED_FEEDBACK_ITEMS");
+        handleResponse();
 
-        String response = (String) objectInputStream.readObject();
-        System.out.println(response);
-
-        System.out.print("Enter the item ID for detailed feedback: ");
-        int itemId = Integer.parseInt(bufferedReader.readLine());
+        System.out.print("Enter the item ID: ");
+        int itemId = Integer.parseInt(bufferedReader.readLine().trim());
         objectOutputStream.writeObject(itemId);
 
-        String question1 = (String) objectInputStream.readObject();
-        System.out.println(question1);
+        System.out.print(objectInputStream.readObject() + " ");
         String answer1 = bufferedReader.readLine();
         objectOutputStream.writeObject(answer1);
 
-        String question2 = (String) objectInputStream.readObject();
-        System.out.println(question2);
+        System.out.print(objectInputStream.readObject() + " ");
         String answer2 = bufferedReader.readLine();
         objectOutputStream.writeObject(answer2);
 
-        String question3 = (String) objectInputStream.readObject();
-        System.out.println(question3);
+        System.out.print(objectInputStream.readObject() + " ");
         String answer3 = bufferedReader.readLine();
         objectOutputStream.writeObject(answer3);
 
@@ -141,25 +140,31 @@ public class EmployeeControllerClient {
     }
 
     private void handleUpdateProfile(BufferedReader bufferedReader) throws IOException, ClassNotFoundException {
-        System.out.println("Please answer these questions to know your preferences");
-
-        System.out.println("1) Please select one - \n1. Vegetarian\n2. Non Vegetarian\n3. Eggetarian");
+        System.out.print("Enter your food type choice: ");
         int foodTypeChoice = Integer.parseInt(bufferedReader.readLine().trim());
         objectOutputStream.writeObject(foodTypeChoice);
 
-        System.out.println("2) Please select your spice level - \n1. High\n2. Medium\n3. Low");
+        System.out.print("Enter your spice level choice: ");
         int spiceLevelChoice = Integer.parseInt(bufferedReader.readLine().trim());
         objectOutputStream.writeObject(spiceLevelChoice);
 
-        System.out.println("3) What do you prefer most? - \n1. North Indian\n2. South Indian\n3. Other");
+        System.out.print("Enter your cuisine choice: ");
         int cuisineChoice = Integer.parseInt(bufferedReader.readLine().trim());
         objectOutputStream.writeObject(cuisineChoice);
 
-        System.out.println("4) Do you have a sweet tooth? - \n1. Yes\n2. No");
+        System.out.print("Enter your sweet tooth choice: ");
         int sweetToothChoice = Integer.parseInt(bufferedReader.readLine().trim());
         objectOutputStream.writeObject(sweetToothChoice);
 
         handleResponse();
+    }
+
+    private void handleGetRecommendations(int userId) throws IOException, ClassNotFoundException {
+        List<Item> recommendations = (List<Item>) objectInputStream.readObject();
+        System.out.println("Recommended Items:");
+        for (Item item : recommendations) {
+            System.out.println(item);
+        }
     }
 
     private void handleResponse() throws IOException, ClassNotFoundException {

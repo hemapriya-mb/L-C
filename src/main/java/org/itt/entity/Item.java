@@ -13,6 +13,7 @@ public class Item implements Serializable {
     private String spiceLevel;
     private String cuisineType;
     private Boolean sweet;
+    private double averageRating;
 
     public Item() {
     }
@@ -95,5 +96,13 @@ public class Item implements Serializable {
 
     public void setSweet(Boolean sweet) {
         this.sweet = sweet;
+    }
+
+    public double getAverageRating() {
+        return averageRating;
+    }
+
+    public void setAverageRating(double averageRating) {
+        this.averageRating = averageRating;
     }
 }
