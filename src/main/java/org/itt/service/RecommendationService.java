@@ -1,89 +1,38 @@
 package org.itt.service;
 
-import org.itt.dao.FeedbackRepository;
-import org.itt.entity.Feedback;
+import org.itt.dao.ItemRepository;
+import org.itt.dao.ProfileRepository;
+import org.itt.entity.Profile;
+import org.itt.entity.Item;
 import org.itt.exception.DatabaseException;
 
-import java.util.HashMap;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
 
 public class RecommendationService {
-    private final FeedbackRepository feedbackRepository;
+    private final ProfileRepository profileRepository;
+    private final ItemRepository itemRepository;
 
     public RecommendationService() {
-        feedbackRepository = new FeedbackRepository();
+        this.profileRepository = new ProfileRepository();
+        this.itemRepository = new ItemRepository();
     }
 
-    public String generateRecommendations() {
-        StringBuilder recommendations = new StringBuilder();
-        try {
-            List<Feedback> allFeedback = feedbackRepository.getAllFeedback();
-            Map<Integer, ItemFeedbackSummary> itemFeedbackMap = new HashMap<>();
-
-            for (Feedback feedback : allFeedback) {
-                int itemId = feedback.getItemId();
-                ItemFeedbackSummary summary = itemFeedbackMap.getOrDefault(itemId, new ItemFeedbackSummary(itemId));
-
-                summary.addRating(feedback.getRating());
-                summary.addComment(feedback.getComment());
-
-                itemFeedbackMap.put(itemId, summary);
-            }
-
-            for (ItemFeedbackSummary summary : itemFeedbackMap.values()) {
-                recommendations.append("Item ID: ").append(summary.getItemId()).append("\n")
-                        .append("Average Rating: ").append(summary.getAverageRating()).append("\n")
-                        .append("Feedback Summary: ").append(summary.getCommentSummary()).append("\n")
-                        .append("-----------------------------------------\n");
-            }
-
-        } catch (DatabaseException e) {
-            throw new RuntimeException(e);
-        }
-        return recommendations.toString();
-    }
-
-    private class ItemFeedbackSummary {
-        private int itemId;
-        private int totalRating;
-        private int ratingCount;
-        private Map<String, Integer> commentCountMap;
-
-        public ItemFeedbackSummary(int itemId) {
-            this.itemId = itemId;
-            this.totalRating = 0;
-            this.ratingCount = 0;
-            this.commentCountMap = new HashMap<>();
+    public List<Item> recommendItems(int userId) throws DatabaseException {
+        Profile profile = profileRepository.getProfileByUserId(userId);
+        if (profile == null) {
+            throw new DatabaseException("user profile not found");
         }
 
-        public void addRating(int rating) {
-            totalRating += rating;
-            ratingCount++;
-        }
+        List<Item> items = itemRepository.getAllItems();
 
-        public void addComment(String comment) {
-            String[] comments = comment.split(",");
-            for (String comm : comments) {
-                comm = comm.trim();
-                commentCountMap.put(comm, commentCountMap.getOrDefault(comm, 0) + 1);
-            }
-        }
-
-        public double getAverageRating() {
-            return (double) totalRating / ratingCount;
-        }
-
-        public int getItemId() {
-            return itemId;
-        }
-
-        public String getCommentSummary() {
-            StringBuilder summary = new StringBuilder();
-            for (Map.Entry<String, Integer> entry : commentCountMap.entrySet()) {
-                summary.append(entry.getKey()).append(": ").append(entry.getValue()).append(", ");
-            }
-            return summary.toString();
-        }
+        return items.stream()
+                .filter(item -> item.getFoodType().equalsIgnoreCase(profile.getFoodType()))
+                .filter(item -> item.getSpiceLevel().equalsIgnoreCase(profile.getSpiceLevel()))
+                .filter(item -> item.getCuisineType().equalsIgnoreCase(profile.getCuisineType()))
+                .filter(item -> item.getSweet() == profile.isSweet())
+                .sorted(Comparator.comparingDouble(Item::getAverageRating).reversed())
+                .collect(Collectors.toList());
     }
 }

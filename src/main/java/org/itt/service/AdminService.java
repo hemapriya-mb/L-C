@@ -58,15 +58,8 @@ public class AdminService {
         }
     }
 
-    public String addMenuItem(String itemName, double price, String availabilityStatus, String mealType, String description) {
+    public String addMenuItem(Item newItem) {
         try {
-            Item newItem = new Item();
-            newItem.setItemName(itemName);
-            newItem.setPrice(price);
-            newItem.setAvailabilityStatus(availabilityStatus);
-            newItem.setMealType(mealType);
-            newItem.setDescription(description);
-
             itemRepository.addItem(newItem);
             return "Item added successfully.";
         } catch (DatabaseException e) {
@@ -74,19 +67,11 @@ public class AdminService {
         }
     }
 
-    public String updateMenuItem(int itemId, String itemName, double price, String availabilityStatus, String mealType, String description) {
+    public String updateMenuItem(Item updatedItem) {
         try {
-            if (!itemRepository.checkItemPresent(itemId)) {
-                return "Item with ID " + itemId + " does not exist.";
+            if (!itemRepository.checkItemPresent(updatedItem.getItemId())) {
+                return "Item with ID " + updatedItem.getItemId() + " does not exist.";
             }
-
-            Item updatedItem = new Item();
-            updatedItem.setItemId(itemId);
-            updatedItem.setItemName(itemName);
-            updatedItem.setPrice(price);
-            updatedItem.setAvailabilityStatus(availabilityStatus);
-            updatedItem.setMealType(mealType);
-            updatedItem.setDescription(description);
 
             boolean isUpdated = itemRepository.updateItem(updatedItem);
 
@@ -95,6 +80,7 @@ public class AdminService {
             return e.getMessage();
         }
     }
+
 
     public String deleteMenuItem(int itemId) {
         try {

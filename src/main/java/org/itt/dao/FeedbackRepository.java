@@ -12,7 +12,7 @@ public class FeedbackRepository {
     public void addFeedback(Feedback feedback) throws DatabaseException {
         String query = "INSERT INTO feedback (user_id, order_id, item_id, rating, comment) VALUES (?, ?, ?, ?, ?)";
 
-        try (Connection connection = DataBaseConnector.getConnection();
+        try (Connection connection = DataBaseConnector.getInstance().getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setInt(1, feedback.getUserId());
             statement.setInt(2, feedback.getOrderId());
@@ -29,7 +29,7 @@ public class FeedbackRepository {
         List<Feedback> feedbackList = new ArrayList<>();
         String query = "SELECT * FROM feedback WHERE item_id = ?";
 
-        try (Connection connection = DataBaseConnector.getConnection();
+        try (Connection connection = DataBaseConnector.getInstance().getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setInt(1, itemId);
 
@@ -56,7 +56,7 @@ public class FeedbackRepository {
         List<Feedback> feedbackList = new ArrayList<>();
         String query = "SELECT * FROM feedback";
 
-        try (Connection connection = DataBaseConnector.getConnection();
+        try (Connection connection = DataBaseConnector.getInstance().getConnection();
              PreparedStatement statement = connection.prepareStatement(query);
              ResultSet resultSet = statement.executeQuery()) {
 

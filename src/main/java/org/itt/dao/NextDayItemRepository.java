@@ -12,7 +12,7 @@ public class NextDayItemRepository {
         String query = "INSERT INTO next_day_item (item_id) VALUES (?) " +
                 "ON DUPLICATE KEY UPDATE poll_count = poll_count + 1";
 
-        try (Connection connection = DataBaseConnector.getConnection();
+        try (Connection connection = DataBaseConnector.getInstance().getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             for (int itemId : itemIds) {
                 statement.setInt(1, itemId);
@@ -27,7 +27,7 @@ public class NextDayItemRepository {
         List<Integer> itemIds = new ArrayList<>();
         String query = "SELECT item_id FROM next_day_item";
 
-        try (Connection connection = DataBaseConnector.getConnection();
+        try (Connection connection = DataBaseConnector.getInstance().getConnection();
              Statement statement = connection.createStatement();
              ResultSet resultSet = statement.executeQuery(query)) {
 
@@ -44,7 +44,7 @@ public class NextDayItemRepository {
     public void incrementPollCount(int itemId) throws DatabaseException {
         String query = "UPDATE next_day_item SET poll_count = poll_count + 1 WHERE item_id = ?";
 
-        try (Connection connection = DataBaseConnector.getConnection();
+        try (Connection connection = DataBaseConnector.getInstance().getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setInt(1, itemId);
             statement.executeUpdate();

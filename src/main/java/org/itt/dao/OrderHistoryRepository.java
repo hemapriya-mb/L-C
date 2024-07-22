@@ -12,7 +12,7 @@ public class OrderHistoryRepository {
     public void addOrder(OrderHistory orderHistory) throws DatabaseException {
         String query = "INSERT INTO order_history (user_id, item_id) VALUES (?, ?)";
 
-        try (Connection connection = DataBaseConnector.getConnection();
+        try (Connection connection = DataBaseConnector.getInstance().getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setInt(1, orderHistory.getUserId());
             statement.setInt(2, orderHistory.getItemId());
@@ -29,7 +29,7 @@ public class OrderHistoryRepository {
                 "JOIN item i ON oh.item_id = i.item_id " +
                 "WHERE oh.user_id = ?";
 
-        try (Connection connection = DataBaseConnector.getConnection();
+        try (Connection connection = DataBaseConnector.getInstance().getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setInt(1, userId);
 

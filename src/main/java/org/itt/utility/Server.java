@@ -10,6 +10,7 @@ import java.util.logging.*;
 public class Server {
 
     private static final Logger logger = Logger.getLogger(Server.class.getName());
+    private static final String PORT_NUMBER =System.getenv("PORT_NUMBER");
 
     static {
         try {
@@ -30,15 +31,16 @@ public class Server {
     }
 
     public static void main(String[] args) {
-        try (ServerSocket serverSocket = new ServerSocket(5000)) {
-            System.out.println("Server is listening on port 5000");
+        try (ServerSocket serverSocket = new ServerSocket(Integer.parseInt(PORT_NUMBER))) {
+            System.out.println("Server is listening on port : "+PORT_NUMBER);
 
             while (true) {
                 Socket socket = serverSocket.accept();
+                System.out.println("Client connected: " + socket.getInetAddress().getHostAddress());
                 new LoginController(socket).start();
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("unable to connect please try again : "+ e.getMessage());
         }
     }
 

@@ -16,6 +16,7 @@ public class EmployeeService {
     private final NotificationRepository notificationRepository;
     private final FeedbackRepository feedbackRepository;
     private final PollRepository pollRepository;
+    private final DetailedFeedbackRepository detailedFeedbackRepository;
 
     public EmployeeService() {
         itemRepository = new ItemRepository();
@@ -23,6 +24,7 @@ public class EmployeeService {
         notificationRepository = new NotificationRepository();
         feedbackRepository = new FeedbackRepository();
         pollRepository = new PollRepository();
+        detailedFeedbackRepository = new DetailedFeedbackRepository();
     }
 
     public String getEmployeeMenu() {
@@ -238,5 +240,40 @@ public class EmployeeService {
         }
 
         return recommendations.toString();
+    }
+
+    public String giveDetailedFeedback(int userId, int itemId, String answer1, String answer2, String answer3) {
+        try {
+            DetailedFeedback detailedFeedback = new DetailedFeedback(userId, itemId, answer1, answer2, answer3);
+            detailedFeedbackRepository.addDetailedFeedback(detailedFeedback);
+            return "Detailed feedback submitted successfully.";
+        } catch (DatabaseException e) {
+            return "An error occurred while submitting detailed feedback: " + e.getMessage();
+        }
+    }
+
+    public String getItemsForDetailedFeedback() throws DatabaseException {
+        List<Item> items = itemRepository.  getItemsForDetailedFeedback();
+        if (items.isEmpty()) {
+            return "No items available for detailed feedback.";
+        }
+        StringBuilder response = new StringBuilder("Items available for detailed feedback:\n");
+        for (Item item : items) {
+            response.append("Item ID: ").append(item.getItemId())
+                    .append(", Name: ").append(item.getItemName())
+                    .append(", Price: ").append(item.getPrice())
+                    .append("\n");
+        }
+        return response.toString();
+    }
+
+    public String updateProfile(int userId, int foodTypeChoice, int spiceLevelChoice, int cuisineChoice, int sweetToothChoice) throws DatabaseException {
+        ProfileRepository profileRepository = new ProfileRepository();
+        profileRepository.saveProfile(userId, foodTypeChoice, spiceLevelChoice, cuisineChoice, sweetToothChoice);
+        return "Profile updated successfully.";
+    }
+    public List<Item> getRecommendedItems(int userId) throws DatabaseException {
+        RecommendationService recommendationService = new RecommendationService();
+        return recommendationService.recommendItems(userId);
     }
 }

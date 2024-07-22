@@ -12,7 +12,7 @@ public class NotificationRepository {
     public void addNotification(int userId, String message) throws DatabaseException {
         String query = "INSERT INTO notification (user_id, message) VALUES (?, ?)";
 
-        try (Connection connection = DataBaseConnector.getConnection();
+        try (Connection connection = DataBaseConnector.getInstance().getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setInt(1, userId);
             statement.setString(2, message);
@@ -26,7 +26,7 @@ public class NotificationRepository {
         List<Notification> notifications = new ArrayList<>();
         String query = "SELECT * FROM notification WHERE user_id = ? AND is_read = FALSE";
 
-        try (Connection connection = DataBaseConnector.getConnection();
+        try (Connection connection = DataBaseConnector.getInstance().getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setInt(1, userId);
 
@@ -51,7 +51,7 @@ public class NotificationRepository {
     public void markNotificationsAsRead(int userId) throws DatabaseException {
         String query = "UPDATE notification SET is_read = TRUE WHERE user_id = ? AND is_read = FALSE";
 
-        try (Connection connection = DataBaseConnector.getConnection();
+        try (Connection connection = DataBaseConnector.getInstance().getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setInt(1, userId);
             statement.executeUpdate();
