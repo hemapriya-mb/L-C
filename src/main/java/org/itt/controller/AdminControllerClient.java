@@ -1,10 +1,8 @@
-package org.itt.utility;
+package org.itt.controller;
 
 import org.itt.constant.AdminAction;
 import org.itt.entity.Item;
-import org.itt.entity.User;
 import org.itt.exception.InvalidInputException;
-import org.itt.service.ItemService;
 import org.itt.service.UserService;
 
 import java.io.BufferedReader;
@@ -12,19 +10,18 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.List;
 
-public class AdminTaskClient {
+public class AdminControllerClient {
 
     private final ObjectInputStream objectInputStream;
     private final ObjectOutputStream objectOutputStream;
     private final UserService userService;
-    private final ItemService itemService;
 
-    public AdminTaskClient(ObjectInputStream objectInputStream, ObjectOutputStream objectOutputStream) {
+    public AdminControllerClient(ObjectInputStream objectInputStream, ObjectOutputStream objectOutputStream) {
         this.objectInputStream = objectInputStream;
         this.objectOutputStream = objectOutputStream;
         this.userService = new UserService();
-        this.itemService = new ItemService();
     }
 
     public void handleAdminTasks() {
@@ -48,10 +45,10 @@ public class AdminTaskClient {
 
                 switch (choice) {
                     case ADD_NEW_USER:
-                        handleAddUser(bufferedReader);
+                        handleAddUser();
                         break;
                     case ADD_MENU_ITEM:
-                        handleAddMenuItem(bufferedReader);
+                        handleAddMenuItem();
                         break;
                     case UPDATE_MENU_ITEM:
                         handleUpdateMenuItem(bufferedReader);
@@ -76,45 +73,60 @@ public class AdminTaskClient {
         }
     }
 
-    private void handleAddUser(BufferedReader bufferedReader) throws IOException {
+    private void handleAddUser() throws IOException {
         try {
-            User user = userService.getUserDetail();
-            objectOutputStream.writeObject(user.getName());
-            objectOutputStream.writeObject(user.getRole());
-            objectOutputStream.writeObject(user.getPassword());
+            String name = userService.getUserName();
+            String role = userService.getUserRole();
+            String password = userService.getValidPassword();
+            objectOutputStream.writeObject(name);
+            objectOutputStream.writeObject(role);
+            objectOutputStream.writeObject(password);
         } catch (InvalidInputException e) {
             System.out.println(e.getMessage());
         }
     }
 
-    private void handleAddMenuItem(BufferedReader bufferedReader) throws IOException {
-        try {
-            Item item = itemService.getItemDetails();
-            objectOutputStream.writeObject(item.getItemName());
-            objectOutputStream.writeObject(item.getPrice());
-            objectOutputStream.writeObject(item.getAvailabilityStatus());
-            objectOutputStream.writeObject(item.getMealType());
-            objectOutputStream.writeObject(item.getDescription());
-        } catch (InvalidInputException e) {
-            System.out.println(e.getMessage());
-        }
+    private void handleAddMenuItem() throws IOException {
+        Item item = new Item();
+
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+
+        System.out.print("Enter item name: ");
+        item.setItemName(bufferedReader.readLine());
+
+        System.out.print("Enter price: ");
+        item.setPrice(Double.parseDouble(bufferedReader.readLine()));
+
+        System.out.print("Enter availability status: ");
+        item.setAvailabilityStatus(bufferedReader.readLine());
+
+        System.out.print("Enter meal type(breakfast,lunch,dinner): ");
+        item.setMealType(bufferedReader.readLine());
+
+        System.out.print("Enter description: ");
+        item.setDescription(bufferedReader.readLine());
+
+        System.out.print("Enter food type( Vegetarian,Non Vegetarian,Eggetarian): ");
+        item.setFoodType(bufferedReader.readLine());
+
+        System.out.print("Enter spice level(high,medium,low): ");
+        item.setSpiceLevel(bufferedReader.readLine());
+
+        System.out.print("Enter cuisine type(north indian, south indian, other): ");
+        item.setCuisineType(bufferedReader.readLine());
+
+        System.out.print("Is it sweet? (true/false): ");
+        item.setSweet(Boolean.parseBoolean(bufferedReader.readLine()));
+
+        objectOutputStream.writeObject(item);
     }
 
     private void handleUpdateMenuItem(BufferedReader bufferedReader) throws IOException {
-        try {
-            System.out.print("Enter item ID to update: ");
-            int itemId = Integer.parseInt(bufferedReader.readLine());
-            objectOutputStream.writeObject(itemId);
+        System.out.print("Enter item ID to update: ");
+        int itemId = Integer.parseInt(bufferedReader.readLine());
+        objectOutputStream.writeObject(itemId);
 
-            Item item = itemService.getItemDetails();
-            objectOutputStream.writeObject(item.getItemName());
-            objectOutputStream.writeObject(item.getPrice());
-            objectOutputStream.writeObject(item.getAvailabilityStatus());
-            objectOutputStream.writeObject(item.getMealType());
-            objectOutputStream.writeObject(item.getDescription());
-        } catch (InvalidInputException e) {
-            System.out.println(e.getMessage());
-        }
+        handleAddMenuItem();
     }
 
     private void handleDeleteMenuItem(BufferedReader bufferedReader) throws IOException {
@@ -122,4 +134,5 @@ public class AdminTaskClient {
         int itemId = Integer.parseInt(bufferedReader.readLine());
         objectOutputStream.writeObject(itemId);
     }
+
 }

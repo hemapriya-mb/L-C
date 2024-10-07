@@ -9,11 +9,15 @@ public class Item implements Serializable {
     private String availabilityStatus;
     private String mealType;
     private String description;
-    private double rating;
+    private String foodType;
+    private String spiceLevel;
+    private String cuisineType;
+    private Boolean sweet;
     private double averageRating;
-    private int pollCount;
+
     public Item() {
     }
+
     public int getItemId() {
         return itemId;
     }
@@ -62,12 +66,36 @@ public class Item implements Serializable {
         this.description = description;
     }
 
-    public double getRating() {
-        return rating;
+    public String getFoodType() {
+        return foodType;
     }
 
-    public void setRating(double rating) {
-        this.rating = rating;
+    public void setFoodType(String foodType) {
+        this.foodType = foodType;
+    }
+
+    public String getSpiceLevel() {
+        return spiceLevel;
+    }
+
+    public void setSpiceLevel(String spiceLevel) {
+        this.spiceLevel = spiceLevel;
+    }
+
+    public String getCuisineType() {
+        return cuisineType;
+    }
+
+    public void setCuisineType(String cuisineType) {
+        this.cuisineType = cuisineType;
+    }
+
+    public Boolean getSweet() {
+        return sweet;
+    }
+
+    public void setSweet(Boolean sweet) {
+        this.sweet = sweet;
     }
 
     public double getAverageRating() {
@@ -77,13 +105,4 @@ public class Item implements Serializable {
     public void setAverageRating(double averageRating) {
         this.averageRating = averageRating;
     }
-
-    public int getPollCount() {
-        return pollCount;
-    }
-
-    public void setPollCount(int pollCount) {
-        this.pollCount = pollCount;
-    }
-
 }
